@@ -245,32 +245,19 @@ __stable_sort_impl(_RandomAccessIterator __first, _RandomAccessIterator __last, 
   using difference_type = typename iterator_traits<_RandomAccessIterator>::difference_type;
 
   difference_type __len = __last - __first;
-  pair<value_type*, ptrdiff_t> __buf(0, 0);
-#if _LIBCPP_STD_VER >= 23
+  value_type* __buff    = 0;
+  ptrdiff_t __buff_size = 0;
   __split_buffer<value_type> __v;
-#else
-  unique_ptr<value_type, __return_temporary_buffer> __h;
-#endif
   if (__len > static_cast<difference_type>(__stable_sort_switch<value_type>::value)) {
-#if _LIBCPP_STD_VER >= 23
-    if consteval {
-      __v.reserve(__len);
-      __buf.first  = __v.__first_;
-      __buf.second = __len;
-    } else {
-#else
-    // TODO: Remove the use of std::get_temporary_buffer
-    _LIBCPP_SUPPRESS_DEPRECATED_PUSH
-    __buf = std::get_temporary_buffer<value_type>(__len);
-    _LIBCPP_SUPPRESS_DEPRECATED_POP
-    __h.reset(__buf.first);
-#endif
-#if _LIBCPP_STD_VER >= 23
-    }
-#endif
+    __buff_size = __len;
+    while
+
+    __v.reserve(__len);
+    __buff      = __v.__first_;
+    __buff_size = __len;
   }
 
-  std::__stable_sort<_AlgPolicy, __comp_ref_type<_Compare> >(__first, __last, __comp, __len, __buf.first, __buf.second);
+  std::__stable_sort<_AlgPolicy, __comp_ref_type<_Compare> >(__first, __last, __comp, __len, __buff, __buff_size);
   std::__check_strict_weak_ordering_sorted(__first, __last, __comp);
 }
 
