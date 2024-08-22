@@ -20,11 +20,11 @@
 #include <__memory/destruct_n.h>
 #include <__memory/temporary_buffer.h>
 #include <__memory/unique_ptr.h>
+#include <__split_buffer>
 #include <__type_traits/is_trivially_assignable.h>
 #include <__utility/move.h>
 #include <__utility/pair.h>
 #include <new>
-#include <vector>
 
 #if !defined(_LIBCPP_HAS_NO_PRAGMA_SYSTEM_HEADER)
 #  pragma GCC system_header
@@ -246,14 +246,17 @@ __stable_sort_impl(_RandomAccessIterator __first, _RandomAccessIterator __last, 
 
   difference_type __len = __last - __first;
   pair<value_type*, ptrdiff_t> __buf(0, 0);
+#if _LIBCPP_STD_VER >= 23
+  __split_buffer<value_type> __v;
+#else
   unique_ptr<value_type, __return_temporary_buffer> __h;
-  std::vector<value_type> __h_vec;
+#endif
   if (__len > static_cast<difference_type>(__stable_sort_switch<value_type>::value)) {
 #if _LIBCPP_STD_VER >= 23
     if consteval {
-      __h_vec.reserve(__len);
-      __buf.first  = __h_vec.data();
-      __buf.second = __h_vec.size();
+      __v.reserve(__len);
+      __buf.first  = __v.__first_;
+      __buf.second = __len;
     } else {
 #else
     // TODO: Remove the use of std::get_temporary_buffer

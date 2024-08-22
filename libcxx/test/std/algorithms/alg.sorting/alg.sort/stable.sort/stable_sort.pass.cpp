@@ -209,6 +209,12 @@ struct Element {
   int key;
   int value;
   _LIBCPP_CONSTEXPR_SINCE_CXX23 Element(int key, int value) : key(key), value(value) {}
+  _LIBCPP_CONSTEXPR_SINCE_CXX23 Element(const Element& other) : key(other.key), value(other.value) {}
+  _LIBCPP_CONSTEXPR_SINCE_CXX23 Element& operator=(const Element& other) {
+    key   = other.key;
+    value = other.value;
+    return *this;
+  }
   _LIBCPP_CONSTEXPR_SINCE_CXX23 bool operator==(const Element other) const {
     return (key == other.key) and (value == other.value);
   }
