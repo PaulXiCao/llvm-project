@@ -25,16 +25,19 @@ concept implicitly_constructible_from = requires(Args&&... args) { conversion_te
 static_assert(std::constructible_from<std::ranges::cartesian_product_view<SimpleCommon>, SimpleCommon>);
 static_assert(!implicitly_constructible_from<std::ranges::cartesian_product_view<SimpleCommon>, SimpleCommon>);
 
-static_assert(std::constructible_from<std::ranges::cartesian_product_view<SimpleCommon, SimpleCommon>, SimpleCommon, SimpleCommon>);
-static_assert(
-    !implicitly_constructible_from<std::ranges::cartesian_product_view<SimpleCommon, SimpleCommon>, SimpleCommon, SimpleCommon>);
+static_assert(std::constructible_from<std::ranges::cartesian_product_view<SimpleCommon, SimpleCommon>,
+                                      SimpleCommon,
+                                      SimpleCommon>);
+static_assert(!implicitly_constructible_from<std::ranges::cartesian_product_view<SimpleCommon, SimpleCommon>,
+                                             SimpleCommon,
+                                             SimpleCommon>);
 
 struct MoveAwareView : std::ranges::view_base {
-  int moves = 0;
+  int moves                 = 0;
   constexpr MoveAwareView() = default;
   constexpr MoveAwareView(MoveAwareView&& other) : moves(other.moves + 1) { other.moves = 1; }
   constexpr MoveAwareView& operator=(MoveAwareView&& other) {
-    moves = other.moves + 1;
+    moves       = other.moves + 1;
     other.moves = 0;
     return *this;
   }
@@ -51,12 +54,12 @@ constexpr void constructorTest(auto&& buffer1, auto&& buffer2) {
 }
 
 constexpr bool test() {
-
-  int buffer[] = {1, 2, 3, 4, 5, 6, 7, 8};
+  int buffer[]  = {1, 2, 3, 4, 5, 6, 7, 8};
   int buffer2[] = {9, 8, 7, 6};
 
   { // constructor from views
-    std::ranges::cartesian_product_view v(SizedRandomAccessView{buffer}, std::views::iota(0), std::ranges::single_view(2.));
+    std::ranges::cartesian_product_view v(
+        SizedRandomAccessView{buffer}, std::views::iota(0), std::ranges::single_view(2.));
     assert(*v.begin() == std::make_tuple(1, 0, 2.0));
   }
 

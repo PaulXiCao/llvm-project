@@ -138,7 +138,7 @@ private:
         return ranges::begin(rng);
       };
 
-      return std::make_tuple(begin_or_first_end(std::bool_constant<I == 0>{}, std::get<I>(b))...);
+      return std::make_tuple(begin_or_first_end(std::bool_constant < I == 0 > {}, std::get<I>(b))...);
     };
     iterator<is_const> it(*this, ranges_to_iterators(std::make_index_sequence<1 + sizeof...(Vs)>{}));
     return it;

@@ -17,9 +17,7 @@ constexpr bool test() {
   struct ConstexprStringStream {
     std::string str;
 
-    constexpr ConstexprStringStream& operator<<(int x) {
-      return *this << char(x + 48);
-    }
+    constexpr ConstexprStringStream& operator<<(int x) { return *this << char(x + 48); }
     constexpr ConstexprStringStream& operator<<(char c) {
       str += c;
       return *this;
@@ -61,7 +59,7 @@ constexpr bool test() {
       "2 2 1\n"
       "2 2 2\n";
   assert(out.str == expected);
-  
+
   return true;
 }
 

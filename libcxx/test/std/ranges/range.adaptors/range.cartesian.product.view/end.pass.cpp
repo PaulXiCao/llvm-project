@@ -34,13 +34,13 @@ constexpr bool test() {
     assert(c.end() == c.begin() + N0 * N1);
   }
 
-  { // (non-empty range)^3 
+  { // (non-empty range)^3
     constexpr size_t N0 = 5, N1 = 42, N2 = 7;
     std::array<int, N0> a0;
     std::array<int, N1> a1;
     std::array<int, N2> a2;
     std::ranges::cartesian_product_view c{a0, a1, a2};
-    assert(c.end() == c.begin() + N0*N1*N2);
+    assert(c.end() == c.begin() + N0 * N1 * N2);
   }
 
   { // empty range
@@ -85,7 +85,7 @@ constexpr bool test() {
     assert(c.end() == c.begin());
   }
 
-  { // empty range X common range X empty range 
+  { // empty range X common range X empty range
     std::ranges::empty_view<int> e;
     constexpr size_t N = 7;
     std::array<int, N> a;
@@ -93,7 +93,7 @@ constexpr bool test() {
     assert(c.end() == c.begin());
   }
 
-  { // common range X empty range X empty range 
+  { // common range X empty range X empty range
     std::ranges::empty_view<int> e;
     constexpr size_t N = 7;
     std::array<int, N> a;
@@ -101,7 +101,7 @@ constexpr bool test() {
     assert(c.end() == c.begin());
   }
 
-  { // empty range X common range X common range 
+  { // empty range X common range X common range
     std::ranges::empty_view<int> e;
     constexpr size_t N0 = 7, N1 = 42;
     std::array<int, N0> a0;
@@ -110,7 +110,7 @@ constexpr bool test() {
     assert(c.end() == c.begin());
   }
 
-  { // common range X empty range X common range 
+  { // common range X empty range X common range
     std::ranges::empty_view<int> e;
     constexpr size_t N0 = 7, N1 = 42;
     std::array<int, N0> a0;
@@ -119,7 +119,7 @@ constexpr bool test() {
     assert(c.end() == c.begin());
   }
 
-  { // common range X common range X empty range 
+  { // common range X common range X empty range
     std::ranges::empty_view<int> e;
     constexpr size_t N0 = 7, N1 = 42;
     std::array<int, N0> a0;
