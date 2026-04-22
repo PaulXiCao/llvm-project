@@ -93,7 +93,7 @@ public:
     return iterator<false>(*this, __tuple_transform(ranges::begin, bases_));
   }
 
-  constexpr iterator<true> begin() const
+  [[nodiscard]] constexpr iterator<true> begin() const
     requires(range<const First> && ... && range<const Vs>)
   {
     return iterator<true>(*this, __tuple_transform(ranges::begin, bases_));
