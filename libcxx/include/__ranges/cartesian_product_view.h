@@ -87,7 +87,7 @@ public:
   constexpr explicit cartesian_product_view(First first_base, Vs... bases)
       : bases_{std::move(first_base), std::move(bases)...} {}
 
-  constexpr iterator<false> begin()
+  [[nodiscard]] constexpr iterator<false> begin()
     requires(!__simple_view<First> || ... || !__simple_view<Vs>)
   {
     return iterator<false>(*this, __tuple_transform(ranges::begin, bases_));
