@@ -40,4 +40,10 @@ void test() {
     // expected-warning@+1 {{ignoring return value of function declared with 'nodiscard' attribute}}
     view.end();
   }
+
+  { // cartesian_product_view<First, Vs>::end() const
+    const std::ranges::cartesian_product_view<ConstAccessibleView> view{ConstAccessibleView{}};
+    // expected-warning@+1 {{ignoring return value of function declared with 'nodiscard' attribute}}
+    view.end();
+  }
 }

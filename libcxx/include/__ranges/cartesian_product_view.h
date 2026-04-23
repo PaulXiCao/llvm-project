@@ -106,7 +106,7 @@ public:
     return end_impl<is_const>();
   }
 
-  constexpr iterator<true> end() const
+  [[nodiscard]] constexpr iterator<true> end() const
     requires cartesian_product_is_common<const First, const Vs...>
   {
     constexpr bool is_const = true;
