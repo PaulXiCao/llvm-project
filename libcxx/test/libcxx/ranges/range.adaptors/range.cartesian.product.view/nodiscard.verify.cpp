@@ -23,15 +23,21 @@ struct ConstAccessibleView : std::ranges::view_base {
 };
 
 void test() {
-  { // cartesian_product_view<First, Vs>::begin() requires !__simple_view<First> || ... || !__simple_view<Vs>
+  { // cartesian_product_view<First, Vs>::begin()
     std::ranges::cartesian_product_view<NonSimpleView> view{NonSimpleView{}};
     // expected-warning@+1 {{ignoring return value of function declared with 'nodiscard' attribute}}
     view.begin();
   }
 
-  { // cartesian_product_view<First, Vs>::begin() const requires range<const First> && ... && range<const Vs>
+  { // cartesian_product_view<First, Vs>::begin() const
     const std::ranges::cartesian_product_view<ConstAccessibleView> view{ConstAccessibleView{}};
     // expected-warning@+1 {{ignoring return value of function declared with 'nodiscard' attribute}}
     view.begin();
+  }
+
+  { // cartesian_product_view<First, Vs>::end()
+    std::ranges::cartesian_product_view<NonSimpleView> view{NonSimpleView{}};
+    // expected-warning@+1 {{ignoring return value of function declared with 'nodiscard' attribute}}
+    view.end();
   }
 }

@@ -99,7 +99,7 @@ public:
     return iterator<true>(*this, __tuple_transform(ranges::begin, bases_));
   }
 
-  constexpr iterator<false> end()
+  [[nodiscard]] constexpr iterator<false> end()
     requires((!__simple_view<First> || ... || !__simple_view<Vs>) && cartesian_product_is_common<First, Vs...>)
   {
     constexpr bool is_const = false;
@@ -129,10 +129,10 @@ public:
 
 private:
   template <bool is_const>
-  constexpr iterator<is_const> end_impl() const {
-    bool is_empty                  = end_is_empty();
-    const auto ranges_to_iterators = [is_empty, &b = bases_]<std::size_t... I>(std::index_sequence<I...>) {
-      const auto begin_or_first_end = [is_empty]<class is_first>(is_first, const auto& rng) {
+  constexpr iterator<is_const> end_impl(this __maybe_const<is_const, cartesian_product_view>& self) {
+    bool is_empty                  = self.end_is_empty();
+    const auto ranges_to_iterators = [is_empty, &b = self.bases_]<std::size_t... I>(std::index_sequence<I...>) {
+      const auto begin_or_first_end = [is_empty]<class is_first>(is_first, auto& rng) {
         if constexpr (is_first::value)
           return is_empty ? ranges::begin(rng) : cartesian_common_arg_end(rng);
         return ranges::begin(rng);
@@ -140,7 +140,7 @@ private:
 
       return std::make_tuple(begin_or_first_end(std::bool_constant< I == 0 >{}, std::get<I>(b))...);
     };
-    iterator<is_const> it(*this, ranges_to_iterators(std::make_index_sequence<1 + sizeof...(Vs)>{}));
+    iterator<is_const> it(self, ranges_to_iterators(std::make_index_sequence<1 + sizeof...(Vs)>{}));
     return it;
   }
 
