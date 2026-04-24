@@ -200,7 +200,7 @@ public:
                        convertible_to<iterator_t<Vs>, iterator_t<const Vs>>)
       : parent_(i.parent_), current_(std::move(i.current_)) {}
 
-  constexpr auto operator*() const {
+  [[nodiscard]] constexpr auto operator*() const {
     return __tuple_transform([](auto& i) -> decltype(auto) { return *i; }, current_);
   }
 

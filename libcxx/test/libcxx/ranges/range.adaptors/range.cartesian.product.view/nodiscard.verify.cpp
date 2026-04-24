@@ -38,7 +38,7 @@ struct SizedView : std::ranges::view_base {
   unsigned size() const;
 };
 
-void test() {
+void test_view() {
   { // cartesian_product_view::begin() requires (!__simple_view<First> || ... || !__simple_view<Vs>)
     static_assert(!std::ranges::__simple_view<NonSimpleView>);
     std::ranges::cartesian_product_view<NonSimpleView> view{NonSimpleView{}};
@@ -89,4 +89,19 @@ void test() {
     // expected-warning@+1 {{ignoring return value of function declared with 'nodiscard' attribute}}
     view.size();
   }
+}
+
+void test_iterator() {
+
+  { // cartesian_product_view::iterator::operator*() const
+    const std::ranges::cartesian_product_view<ConstAccessibleView> view{ConstAccessibleView{}};
+    const auto iter = view.begin();
+    // expected-warning@+1 {{ignoring return value of function declared with 'nodiscard' attribute}}
+    *iter;
+  }
+}
+
+void test() {
+  test_view();
+  test_iterator();
 }
