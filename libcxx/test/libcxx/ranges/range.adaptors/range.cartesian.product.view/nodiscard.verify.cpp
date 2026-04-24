@@ -33,32 +33,38 @@ struct NonCommonView : std::ranges::view_base {
 };
 
 void test() {
-  { // cartesian_product_view::begin()
+  { // cartesian_product_view::begin() requires (!__simple_view<First> || ... || !__simple_view<Vs>)
+    static_assert(!std::ranges::__simple_view<NonSimpleView>);
     std::ranges::cartesian_product_view<NonSimpleView> view{NonSimpleView{}};
     // expected-warning@+1 {{ignoring return value of function declared with 'nodiscard' attribute}}
     view.begin();
   }
 
-  { // cartesian_product_view::begin() const
+  { // cartesian_product_view::begin() const requires (range<const First> && ... && range<const Vs>)
+    static_assert(std::ranges::range<const ConstAccessibleView>);
     const std::ranges::cartesian_product_view<ConstAccessibleView> view{ConstAccessibleView{}};
     // expected-warning@+1 {{ignoring return value of function declared with 'nodiscard' attribute}}
     view.begin();
   }
 
-  { // cartesian_product_view::end()
+  { // cartesian_product_view::end() requires (!__simple_view<First> || ... || !__simple_view<Vs>) && cartesian_product_is_common<First, Vs...>
+    static_assert(!std::ranges::__simple_view<NonSimpleView>);
+    static_assert(std::ranges::cartesian_product_common_arg<NonSimpleView>);
     std::ranges::cartesian_product_view<NonSimpleView> view{NonSimpleView{}};
     // expected-warning@+1 {{ignoring return value of function declared with 'nodiscard' attribute}}
     view.end();
   }
 
-  { // cartesian_product_view::end() const
+  { // cartesian_product_view::end() const requires cartesian_product_is_common<const First, const Vs...>
+    static_assert(std::ranges::cartesian_product_common_arg<const ConstAccessibleView>);
     const std::ranges::cartesian_product_view<ConstAccessibleView> view{ConstAccessibleView{}};
     // expected-warning@+1 {{ignoring return value of function declared with 'nodiscard' attribute}}
     view.end();
   }
 
   { // cartesian_product_view::end() const noexcept -> default_sentinel_t
-    // Selected when cartesian_product_is_common is false (non-common First).
+    // Selected when neither end() overload applies, i.e. cartesian_product_is_common is false.
+    static_assert(!std::ranges::cartesian_product_common_arg<NonCommonView>);
     const std::ranges::cartesian_product_view<NonCommonView> view{NonCommonView{}};
     // expected-warning@+1 {{ignoring return value of function declared with 'nodiscard' attribute}}
     view.end();
