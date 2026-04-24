@@ -121,7 +121,7 @@ public:
     return size_impl();
   }
 
-  constexpr auto size() const
+  [[nodiscard]] constexpr auto size() const
     requires cartesian_product_is_sized<const First, const Vs...>
   {
     return size_impl();

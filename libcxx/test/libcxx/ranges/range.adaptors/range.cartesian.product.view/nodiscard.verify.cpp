@@ -82,4 +82,11 @@ void test() {
     // expected-warning@+1 {{ignoring return value of function declared with 'nodiscard' attribute}}
     view.size();
   }
+  
+  { // cartesian_product_view::size() const requires cartesian_product_is_sized<const First, const Vs...>
+    static_assert(std::ranges::cartesian_product_is_sized<const SizedView>);
+    const std::ranges::cartesian_product_view<SizedView> view{SizedView{}};
+    // expected-warning@+1 {{ignoring return value of function declared with 'nodiscard' attribute}}
+    view.size();
+  }
 }
