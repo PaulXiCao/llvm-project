@@ -32,6 +32,12 @@ struct NonCommonView : std::ranges::view_base {
   Sentinel end() const;
 };
 
+struct SizedView : std::ranges::view_base {
+  int* begin() const;
+  int* end() const;
+  unsigned size() const;
+};
+
 void test() {
   { // cartesian_product_view::begin() requires (!__simple_view<First> || ... || !__simple_view<Vs>)
     static_assert(!std::ranges::__simple_view<NonSimpleView>);
@@ -68,5 +74,12 @@ void test() {
     const std::ranges::cartesian_product_view<NonCommonView> view{NonCommonView{}};
     // expected-warning@+1 {{ignoring return value of function declared with 'nodiscard' attribute}}
     view.end();
+  }
+  
+  { // cartesian_product_view::size() requires cartesian_product_is_sized<First, Vs...>
+    static_assert(std::ranges::cartesian_product_is_sized<SizedView>);
+    std::ranges::cartesian_product_view<SizedView> view{SizedView{}};
+    // expected-warning@+1 {{ignoring return value of function declared with 'nodiscard' attribute}}
+    view.size();
   }
 }

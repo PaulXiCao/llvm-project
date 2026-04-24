@@ -115,7 +115,7 @@ public:
 
   [[nodiscard]] constexpr default_sentinel_t end() const noexcept { return {}; }
 
-  constexpr auto size()
+  [[nodiscard]] constexpr auto size()
     requires cartesian_product_is_sized<First, Vs...>
   {
     return size_impl();
