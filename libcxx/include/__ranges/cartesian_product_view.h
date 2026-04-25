@@ -307,7 +307,7 @@ public:
     return -(i - s);
   }
 
-  friend constexpr auto iter_move(const iterator& i) noexcept(iter_move_noexcept_impl(i)) {
+  [[nodiscard]] friend constexpr auto iter_move(const iterator& i) noexcept(iter_move_noexcept_impl(i)) {
     return __tuple_transform(ranges::iter_move, i.current_);
   }
 
