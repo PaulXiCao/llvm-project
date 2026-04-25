@@ -107,6 +107,14 @@ void test_iterator() {
     // expected-warning@+1 {{ignoring return value of function declared with 'nodiscard' attribute}}
     iter++;
   }
+
+  { // cartesian_product_view::iterator::operator--(int) requires cartesian_product_is_bidirectional<const, First, Vs...>
+    static_assert(std::ranges::cartesian_product_is_bidirectional<true, ConstAccessibleView>);
+    const std::ranges::cartesian_product_view<ConstAccessibleView> view{ConstAccessibleView{}};
+    auto iter = view.begin();
+    // expected-warning@+1 {{ignoring return value of function declared with 'nodiscard' attribute}}
+    iter--;
+  }
 }
 
 void test() {

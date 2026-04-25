@@ -226,7 +226,7 @@ public:
     return *this;
   }
 
-  constexpr iterator operator--(int)
+  [[nodiscard]] constexpr iterator operator--(int)
     requires cartesian_product_is_bidirectional<Const, First, Vs...>
   {
     auto tmp = *this;
