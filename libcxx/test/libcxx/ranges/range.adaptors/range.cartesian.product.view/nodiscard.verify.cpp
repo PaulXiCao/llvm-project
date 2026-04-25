@@ -127,6 +127,15 @@ void test_iterator() {
   }
 
   // Note: comparison operators (operator==, operator<=>) are not tested here - the compiler already warns on discarded comparisons via -Wunused-value, independently of [[nodiscard]].
+
+  { // friend constexpr iterator operator+(const iterator&, difference_type) 
+    // requires cartesian_product_is_random_access<Const, First, Vs...>
+    static_assert(std::ranges::cartesian_product_is_random_access<true, ConstAccessibleView>);
+    const std::ranges::cartesian_product_view<ConstAccessibleView> view{ConstAccessibleView{}};
+    const auto iter = view.begin();
+    // expected-warning@+1 {{ignoring return value of function declared with 'nodiscard' attribute}}
+    iter + 0;
+  }
 }
 
 void test() {
