@@ -10,6 +10,7 @@
 
 // Check that functions are marked [[nodiscard]]
 
+#include <concepts>
 #include <ranges>
 
 struct NonSimpleView : std::ranges::view_base {
@@ -124,6 +125,8 @@ void test_iterator() {
     // expected-warning@+1 {{ignoring return value of function declared with 'nodiscard' attribute}}
     iter[0];
   }
+
+  // Note: comparison operators (operator==, operator<=>) are not tested here - the compiler already warns on discarded comparisons via -Wunused-value, independently of [[nodiscard]].
 }
 
 void test() {
