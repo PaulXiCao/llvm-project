@@ -274,7 +274,7 @@ public:
     return iterator(x) += y;
   }
 
-  friend constexpr iterator operator+(difference_type x, const iterator& y)
+  [[nodiscard]] friend constexpr iterator operator+(difference_type x, const iterator& y)
     requires cartesian_product_is_random_access<Const, First, Vs...>
   {
     return y + x;
