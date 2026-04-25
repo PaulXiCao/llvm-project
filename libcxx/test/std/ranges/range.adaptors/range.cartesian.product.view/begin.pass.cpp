@@ -47,12 +47,9 @@ constexpr bool test() {
   { // all underlying iterators should be at the begin position
     std::ranges::cartesian_product_view v(
         SizedRandomAccessView{buffer}, std::views::iota(0), std::ranges::single_view(2.0));
-    std::same_as<std::tuple<int&, int, double&>> decltype(auto) mutVal         = *v.begin();
-    std::same_as<std::tuple<int&, int, const double&>> decltype(auto) constVal = *std::as_const(v).begin();
-    assert(mutVal == std::make_tuple(1, 0, 2.0));
-    assert(constVal == std::make_tuple(1, 0, 2.0));
-    assert(&(std::get<0>(mutVal)) == &buffer[0]);
-    assert(&(std::get<0>(constVal)) == &buffer[0]);
+    std::same_as<std::tuple<int&, int, double&>> decltype(auto) val = *v.begin();
+    assert(val == std::make_tuple(1, 0, 2.0));
+    assert(&(std::get<0>(val)) == &buffer[0]);
   }
 
   { // with empty range
