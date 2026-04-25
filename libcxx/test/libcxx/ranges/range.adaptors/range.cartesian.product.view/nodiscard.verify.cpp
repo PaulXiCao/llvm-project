@@ -38,22 +38,23 @@ struct SizedView : std::ranges::view_base {
   unsigned size() const;
 };
 
+// testing cartesian_product_view
 void test_view() {
-  { // cartesian_product_view::begin() requires (!__simple_view<First> || ... || !__simple_view<Vs>)
+  { // begin() requires (!__simple_view<First> || ... || !__simple_view<Vs>)
     static_assert(!std::ranges::__simple_view<NonSimpleView>);
     std::ranges::cartesian_product_view<NonSimpleView> view{NonSimpleView{}};
     // expected-warning@+1 {{ignoring return value of function declared with 'nodiscard' attribute}}
     view.begin();
   }
 
-  { // cartesian_product_view::begin() const requires (range<const First> && ... && range<const Vs>)
+  { // begin() const requires (range<const First> && ... && range<const Vs>)
     static_assert(std::ranges::range<const ConstAccessibleView>);
     const std::ranges::cartesian_product_view<ConstAccessibleView> view{ConstAccessibleView{}};
     // expected-warning@+1 {{ignoring return value of function declared with 'nodiscard' attribute}}
     view.begin();
   }
 
-  { // cartesian_product_view::end() requires (!__simple_view<First> || ... || !__simple_view<Vs>) && cartesian_product_is_common<First, Vs...>
+  { // end() requires (!__simple_view<First> || ... || !__simple_view<Vs>) && cartesian_product_is_common<First, Vs...>
     static_assert(!std::ranges::__simple_view<NonSimpleView>);
     static_assert(std::ranges::cartesian_product_common_arg<NonSimpleView>);
     std::ranges::cartesian_product_view<NonSimpleView> view{NonSimpleView{}};
@@ -61,14 +62,14 @@ void test_view() {
     view.end();
   }
 
-  { // cartesian_product_view::end() const requires cartesian_product_is_common<const First, const Vs...>
+  { // end() const requires cartesian_product_is_common<const First, const Vs...>
     static_assert(std::ranges::cartesian_product_common_arg<const ConstAccessibleView>);
     const std::ranges::cartesian_product_view<ConstAccessibleView> view{ConstAccessibleView{}};
     // expected-warning@+1 {{ignoring return value of function declared with 'nodiscard' attribute}}
     view.end();
   }
 
-  { // cartesian_product_view::end() const noexcept -> default_sentinel_t
+  { // end() const noexcept -> default_sentinel_t
     // Selected when neither end() overload applies, i.e. cartesian_product_is_common is false.
     static_assert(!std::ranges::cartesian_product_common_arg<NonCommonView>);
     const std::ranges::cartesian_product_view<NonCommonView> view{NonCommonView{}};
@@ -76,14 +77,14 @@ void test_view() {
     view.end();
   }
   
-  { // cartesian_product_view::size() requires cartesian_product_is_sized<First, Vs...>
+  { // size() requires cartesian_product_is_sized<First, Vs...>
     static_assert(std::ranges::cartesian_product_is_sized<SizedView>);
     std::ranges::cartesian_product_view<SizedView> view{SizedView{}};
     // expected-warning@+1 {{ignoring return value of function declared with 'nodiscard' attribute}}
     view.size();
   }
   
-  { // cartesian_product_view::size() const requires cartesian_product_is_sized<const First, const Vs...>
+  { // size() const requires cartesian_product_is_sized<const First, const Vs...>
     static_assert(std::ranges::cartesian_product_is_sized<const SizedView>);
     const std::ranges::cartesian_product_view<SizedView> view{SizedView{}};
     // expected-warning@+1 {{ignoring return value of function declared with 'nodiscard' attribute}}
@@ -91,16 +92,16 @@ void test_view() {
   }
 }
 
+// testing cartesian_product_view::iterator
 void test_iterator() {
-
-  { // cartesian_product_view::iterator::operator*() const
+  { // operator*() const
     const std::ranges::cartesian_product_view<ConstAccessibleView> view{ConstAccessibleView{}};
     const auto iter = view.begin();
     // expected-warning@+1 {{ignoring return value of function declared with 'nodiscard' attribute}}
     *iter;
   }
 
-  { // cartesian_product_view::iterator::operator++(int) requires forward_range<const First>
+  { // operator++(int) requires forward_range<const First>
     static_assert(std::ranges::forward_range<const ConstAccessibleView>);
     const std::ranges::cartesian_product_view<ConstAccessibleView> view{ConstAccessibleView{}};
     auto iter = view.begin();
@@ -108,7 +109,7 @@ void test_iterator() {
     iter++;
   }
 
-  { // cartesian_product_view::iterator::operator--(int) requires cartesian_product_is_bidirectional<const, First, Vs...>
+  { // operator--(int) requires cartesian_product_is_bidirectional<const, First, Vs...>
     static_assert(std::ranges::cartesian_product_is_bidirectional<true, ConstAccessibleView>);
     const std::ranges::cartesian_product_view<ConstAccessibleView> view{ConstAccessibleView{}};
     auto iter = view.begin();
@@ -116,7 +117,7 @@ void test_iterator() {
     iter--;
   }
 
-  { // cartesian_product_view::iterator::operator[](difference_type) const requires cartesian_product_is_random_access<const, First, Vs...>
+  { // operator[](difference_type) const requires cartesian_product_is_random_access<const, First, Vs...>
     static_assert(std::ranges::cartesian_product_is_random_access<true, ConstAccessibleView>);
     const std::ranges::cartesian_product_view<ConstAccessibleView> view{ConstAccessibleView{}};
     const auto iter = view.begin();
