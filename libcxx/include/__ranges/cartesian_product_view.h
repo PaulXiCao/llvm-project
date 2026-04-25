@@ -301,7 +301,7 @@ public:
     return i.distance_from(end_tuple);
   }
 
-  friend constexpr difference_type operator-(default_sentinel_t s, const iterator& i)
+  [[nodiscard]] friend constexpr difference_type operator-(default_sentinel_t s, const iterator& i)
     requires cartesian_is_sized_sentinel<Const, sentinel_t, First, Vs...>
   {
     return -(i - s);
