@@ -211,7 +211,7 @@ public:
 
   constexpr void operator++(int) { ++*this; }
 
-  constexpr iterator operator++(int)
+  [[nodiscard]] constexpr iterator operator++(int)
     requires forward_range<__maybe_const<Const, First>>
   {
     auto tmp = *this;
