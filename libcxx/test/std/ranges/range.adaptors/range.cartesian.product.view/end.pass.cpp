@@ -6,7 +6,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-// UNSUPPORTED: c++03, c++11, c++14, c++17, c++20
+// REQUIRES: std-at-least-c++23
 
 // constexpr iterator<false> end()       requires ((!simple-view <First> || ... || !simple-view <Vs>) && cartesian-product-is-common<      First,       Vs...>);
 // constexpr iterator<true > end() const requires                                                        cartesian-product-is-common<const First, const Vs...> ;

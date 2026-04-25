@@ -6,7 +6,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-// UNSUPPORTED: c++03, c++11, c++14, c++17, c++20
+// REQUIRES: std-at-least-c++23
 
 // constexpr iterator<false> begin()       requires (!simple-view<First> || ... || !simple-view <Vs>);
 // constexpr iterator<true > begin() const requires (range<const First> && ... && range<const Vs>);
