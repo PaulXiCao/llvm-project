@@ -18,7 +18,7 @@
 #include "test_range.h"
 
 #if TEST_STD_VER <= 20
-#  error "range.adaptor/types.h" can only be included in builds supporting C++23
+#  error "range.adaptor/types.h" can only be included in builds supporting C++20
 #endif // TEST_STD_VER <= 20
 
 template <class T>
