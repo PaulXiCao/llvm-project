@@ -248,7 +248,7 @@ public:
     return *this;
   }
 
-  constexpr reference operator[](difference_type n) const
+  [[nodiscard]] constexpr reference operator[](difference_type n) const
     requires cartesian_product_is_random_access<Const, First, Vs...>
   {
     return *((*this) + n);
