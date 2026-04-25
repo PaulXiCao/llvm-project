@@ -46,8 +46,7 @@ concept __cartesian_product_common_arg = common_range<_Rp> || (sized_range<_Rp> 
 template <bool _Const, class _First, class... _Vs>
 concept __cartesian_product_is_bidirectional =
     (bidirectional_range<__maybe_const<_Const, _First>> && ... &&
-     (bidirectional_range<__maybe_const<_Const, _Vs>> &&
-      __cartesian_product_common_arg<__maybe_const<_Const, _Vs>>));
+     (bidirectional_range<__maybe_const<_Const, _Vs>> && __cartesian_product_common_arg<__maybe_const<_Const, _Vs>>));
 
 template <class _First, class... _Vs>
 concept __cartesian_product_is_common = __cartesian_product_common_arg<_First>;
@@ -57,8 +56,7 @@ concept __cartesian_product_is_sized = (sized_range<_Vs> && ...);
 
 template <bool _Const, template <class> class _FirstSent, class _First, class... _Vs>
 concept __cartesian_is_sized_sentinel =
-    (sized_sentinel_for<_FirstSent<__maybe_const<_Const, _First>>, iterator_t<__maybe_const<_Const, _First>>> &&
-     ... &&
+    (sized_sentinel_for<_FirstSent<__maybe_const<_Const, _First>>, iterator_t<__maybe_const<_Const, _First>>> && ... &&
      (sized_range<__maybe_const<_Const, _Vs>> &&
       sized_sentinel_for<iterator_t<__maybe_const<_Const, _Vs>>, iterator_t<__maybe_const<_Const, _Vs>>>));
 
@@ -102,8 +100,7 @@ public:
   }
 
   [[nodiscard]] constexpr __iterator<false> end()
-    requires((!__simple_view<_First> || ... || !__simple_view<_Vs>) &&
-             __cartesian_product_is_common<_First, _Vs...>)
+    requires((!__simple_view<_First> || ... || !__simple_view<_Vs>) && __cartesian_product_is_common<_First, _Vs...>)
   {
     constexpr bool __is_const_ = false;
     return __end_impl<__is_const_>(*this);
@@ -114,7 +111,7 @@ public:
   {
     constexpr bool __is_const_ = true;
     return __end_impl<__is_const_>(*this);
-  }  
+  }
 
   [[nodiscard]] constexpr default_sentinel_t end() const noexcept { return default_sentinel; }
 
@@ -132,19 +129,17 @@ public:
 
 private:
   template <bool _IsConst>
-  static constexpr __iterator<_IsConst>
-  __end_impl(__maybe_const<_IsConst, cartesian_product_view>& __self) {
+  static constexpr __iterator<_IsConst> __end_impl(__maybe_const<_IsConst, cartesian_product_view>& __self) {
     const bool __empty = __self.__end_is_empty();
-    const auto __ranges_to_iterators = [__empty, &__b = __self.__bases_]<std::size_t... _Ip>(
-                                           std::index_sequence<_Ip...>) {
-      const auto __begin_or_first_end = []<class _IsFirst>(_IsFirst, auto& __rng, bool __empty) {
-        if constexpr (_IsFirst::value)
-          return __empty ? ranges::begin(__rng) : __cartesian_common_arg_end(__rng);
-        return ranges::begin(__rng);
-      };
-      return std::make_tuple(
-          __begin_or_first_end(std::bool_constant<_Ip == 0>{}, std::get<_Ip>(__b), __empty)...);
-    };
+    const auto __ranges_to_iterators =
+        [__empty, &__b = __self.__bases_]<std::size_t... _Ip>(std::index_sequence<_Ip...>) {
+          const auto __begin_or_first_end = []<class _IsFirst>(_IsFirst, auto& __rng, bool __empty) {
+            if constexpr (_IsFirst::value)
+              return __empty ? ranges::begin(__rng) : __cartesian_common_arg_end(__rng);
+            return ranges::begin(__rng);
+          };
+          return std::make_tuple(__begin_or_first_end(std::bool_constant<_Ip == 0>{}, std::get<_Ip>(__b), __empty)...);
+        };
     __iterator<_IsConst> __it(__self, __ranges_to_iterators(std::make_index_sequence<1 + sizeof...(_Vs)>{}));
     return __it;
   }
@@ -408,15 +403,13 @@ private:
   template <auto _Np>
   constexpr difference_type __scaled_size() const {
     if constexpr (_Np <= sizeof...(_Vs))
-      return static_cast<difference_type>(ranges::size(std::get<_Np>(__parent_->__bases_))) *
-             __scaled_size<_Np + 1>();
+      return static_cast<difference_type>(ranges::size(std::get<_Np>(__parent_->__bases_))) * __scaled_size<_Np + 1>();
     return static_cast<difference_type>(1);
   }
 
   template <auto _Np>
   constexpr difference_type __scaled_distance(const auto& __t) const {
-    return static_cast<difference_type>(std::get<_Np>(__current_) - std::get<_Np>(__t)) *
-           __scaled_size<_Np + 1>();
+    return static_cast<difference_type>(std::get<_Np>(__current_) - std::get<_Np>(__t)) * __scaled_size<_Np + 1>();
   }
 
   template <auto _Np = 0>
