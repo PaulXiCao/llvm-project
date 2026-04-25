@@ -35,149 +35,154 @@ _LIBCPP_BEGIN_NAMESPACE_STD
 
 namespace ranges {
 
-template <bool Const, class First, class... Vs>
-concept cartesian_product_is_random_access =
-    (random_access_range<__maybe_const<Const, First>> && ... &&
-     (random_access_range<__maybe_const<Const, Vs>> && sized_range<__maybe_const<Const, Vs>>));
+template <bool _Const, class _First, class... _Vs>
+concept __cartesian_product_is_random_access =
+    (random_access_range<__maybe_const<_Const, _First>> && ... &&
+     (random_access_range<__maybe_const<_Const, _Vs>> && sized_range<__maybe_const<_Const, _Vs>>));
 
-template <class R>
-concept cartesian_product_common_arg = common_range<R> || (sized_range<R> && random_access_range<R>);
+template <class _Rp>
+concept __cartesian_product_common_arg = common_range<_Rp> || (sized_range<_Rp> && random_access_range<_Rp>);
 
-template <bool Const, class First, class... Vs>
-concept cartesian_product_is_bidirectional =
-    (bidirectional_range<__maybe_const<Const, First>> && ... &&
-     (bidirectional_range<__maybe_const<Const, Vs>> && cartesian_product_common_arg<__maybe_const<Const, Vs>>));
+template <bool _Const, class _First, class... _Vs>
+concept __cartesian_product_is_bidirectional =
+    (bidirectional_range<__maybe_const<_Const, _First>> && ... &&
+     (bidirectional_range<__maybe_const<_Const, _Vs>> &&
+      __cartesian_product_common_arg<__maybe_const<_Const, _Vs>>));
 
-template <class First, class... Vs>
-concept cartesian_product_is_common = cartesian_product_common_arg<First>;
+template <class _First, class... _Vs>
+concept __cartesian_product_is_common = __cartesian_product_common_arg<_First>;
 
-template <class... Vs>
-concept cartesian_product_is_sized = (sized_range<Vs> && ...);
+template <class... _Vs>
+concept __cartesian_product_is_sized = (sized_range<_Vs> && ...);
 
-template <bool Const, template <class> class FirstSent, class First, class... Vs>
-concept cartesian_is_sized_sentinel =
-    (sized_sentinel_for<FirstSent<__maybe_const<Const, First>>, iterator_t<__maybe_const<Const, First>>> && ... &&
-     (sized_range<__maybe_const<Const, Vs>> &&
-      sized_sentinel_for<iterator_t<__maybe_const<Const, Vs>>, iterator_t<__maybe_const<Const, Vs>>>));
+template <bool _Const, template <class> class _FirstSent, class _First, class... _Vs>
+concept __cartesian_is_sized_sentinel =
+    (sized_sentinel_for<_FirstSent<__maybe_const<_Const, _First>>, iterator_t<__maybe_const<_Const, _First>>> &&
+     ... &&
+     (sized_range<__maybe_const<_Const, _Vs>> &&
+      sized_sentinel_for<iterator_t<__maybe_const<_Const, _Vs>>, iterator_t<__maybe_const<_Const, _Vs>>>));
 
-template <cartesian_product_common_arg R>
-constexpr auto cartesian_common_arg_end(R& r) {
-  if constexpr (common_range<R>) {
-    return ranges::end(r);
+template <__cartesian_product_common_arg _Rp>
+constexpr auto __cartesian_common_arg_end(_Rp& __r) {
+  if constexpr (common_range<_Rp>) {
+    return ranges::end(__r);
   } else {
-    return ranges::begin(r) + ranges::distance(r);
+    return ranges::begin(__r) + ranges::distance(__r);
   }
 }
 
-template <bool Const, class First, class... Vs>
+template <bool _Const, class _First, class... _Vs>
 concept __cartesian_product_all_random_access =
-    (random_access_range<__maybe_const<Const, First>> && ... && random_access_range<__maybe_const<Const, Vs>>);
+    (random_access_range<__maybe_const<_Const, _First>> && ... && random_access_range<__maybe_const<_Const, _Vs>>);
 
-template <input_range First, forward_range... Vs>
-  requires(view<First> && ... && view<Vs>)
-class cartesian_product_view : public view_interface<cartesian_product_view<First, Vs...>> {
+template <input_range _First, forward_range... _Vs>
+  requires(view<_First> && ... && view<_Vs>)
+class cartesian_product_view : public view_interface<cartesian_product_view<_First, _Vs...>> {
 private:
-  tuple<First, Vs...> bases_;
+  tuple<_First, _Vs...> __bases_;
 
-  template <bool Const>
-  class iterator;
+  template <bool _IsConst>
+  class __iterator;
 
 public:
   constexpr cartesian_product_view() = default;
-  constexpr explicit cartesian_product_view(First first_base, Vs... bases)
-      : bases_{std::move(first_base), std::move(bases)...} {}
+  constexpr explicit cartesian_product_view(_First __first_base, _Vs... __bases)
+      : __bases_{std::move(__first_base), std::move(__bases)...} {}
 
-  [[nodiscard]] constexpr iterator<false> begin()
-    requires(!__simple_view<First> || ... || !__simple_view<Vs>)
+  [[nodiscard]] constexpr __iterator<false> begin()
+    requires(!__simple_view<_First> || ... || !__simple_view<_Vs>)
   {
-    return iterator<false>(*this, __tuple_transform(ranges::begin, bases_));
+    return __iterator<false>(*this, __tuple_transform(ranges::begin, __bases_));
   }
 
-  [[nodiscard]] constexpr iterator<true> begin() const
-    requires(range<const First> && ... && range<const Vs>)
+  [[nodiscard]] constexpr __iterator<true> begin() const
+    requires(range<const _First> && ... && range<const _Vs>)
   {
-    return iterator<true>(*this, __tuple_transform(ranges::begin, bases_));
+    return __iterator<true>(*this, __tuple_transform(ranges::begin, __bases_));
   }
 
-  [[nodiscard]] constexpr iterator<false> end()
-    requires((!__simple_view<First> || ... || !__simple_view<Vs>) && cartesian_product_is_common<First, Vs...>)
+  [[nodiscard]] constexpr __iterator<false> end()
+    requires((!__simple_view<_First> || ... || !__simple_view<_Vs>) &&
+             __cartesian_product_is_common<_First, _Vs...>)
   {
-    constexpr bool is_const = false;
-    return end_impl<is_const>();
+    constexpr bool __is_const_ = false;
+    return __end_impl<__is_const_>(*this);
   }
 
-  [[nodiscard]] constexpr iterator<true> end() const
-    requires cartesian_product_is_common<const First, const Vs...>
+  [[nodiscard]] constexpr __iterator<true> end() const
+    requires __cartesian_product_is_common<const _First, const _Vs...>
   {
-    constexpr bool is_const = true;
-    return end_impl<is_const>();
-  }
+    constexpr bool __is_const_ = true;
+    return __end_impl<__is_const_>(*this);
+  }  
 
-  [[nodiscard]] constexpr default_sentinel_t end() const noexcept { return {}; }
+  [[nodiscard]] constexpr default_sentinel_t end() const noexcept { return default_sentinel; }
 
   [[nodiscard]] constexpr auto size()
-    requires cartesian_product_is_sized<First, Vs...>
+    requires __cartesian_product_is_sized<_First, _Vs...>
   {
-    return size_impl();
+    return __size_impl();
   }
 
   [[nodiscard]] constexpr auto size() const
-    requires cartesian_product_is_sized<const First, const Vs...>
+    requires __cartesian_product_is_sized<const _First, const _Vs...>
   {
-    return size_impl();
+    return __size_impl();
   }
 
 private:
-  template <bool is_const>
-  constexpr iterator<is_const> end_impl(this __maybe_const<is_const, cartesian_product_view>& self) {
-    bool is_empty                  = self.end_is_empty();
-    const auto ranges_to_iterators = [is_empty, &b = self.bases_]<std::size_t... I>(std::index_sequence<I...>) {
-      const auto begin_or_first_end = [is_empty]<class is_first>(is_first, auto& rng) {
-        if constexpr (is_first::value)
-          return is_empty ? ranges::begin(rng) : cartesian_common_arg_end(rng);
-        return ranges::begin(rng);
+  template <bool _IsConst>
+  static constexpr __iterator<_IsConst>
+  __end_impl(__maybe_const<_IsConst, cartesian_product_view>& __self) {
+    const bool __empty = __self.__end_is_empty();
+    const auto __ranges_to_iterators = [__empty, &__b = __self.__bases_]<std::size_t... _Ip>(
+                                           std::index_sequence<_Ip...>) {
+      const auto __begin_or_first_end = []<class _IsFirst>(_IsFirst, auto& __rng, bool __empty) {
+        if constexpr (_IsFirst::value)
+          return __empty ? ranges::begin(__rng) : __cartesian_common_arg_end(__rng);
+        return ranges::begin(__rng);
       };
-
-      return std::make_tuple(begin_or_first_end(std::bool_constant< I == 0 >{}, std::get<I>(b))...);
+      return std::make_tuple(
+          __begin_or_first_end(std::bool_constant<_Ip == 0>{}, std::get<_Ip>(__b), __empty)...);
     };
-    iterator<is_const> it(self, ranges_to_iterators(std::make_index_sequence<1 + sizeof...(Vs)>{}));
-    return it;
+    __iterator<_IsConst> __it(__self, __ranges_to_iterators(std::make_index_sequence<1 + sizeof...(_Vs)>{}));
+    return __it;
   }
 
-  template <std::size_t N = 1>
-  constexpr bool end_is_empty() const {
-    if constexpr (N == 1 + sizeof...(Vs))
+  template <std::size_t _Np = 1>
+  constexpr bool __end_is_empty() const {
+    if constexpr (_Np == 1 + sizeof...(_Vs))
       return false;
     else {
-      if (const auto& v = std::get<N>(bases_); ranges::empty(v))
+      if (const auto& __v = std::get<_Np>(__bases_); ranges::empty(__v))
         return true;
-      return end_is_empty<N + 1>();
+      return __end_is_empty<_Np + 1>();
     }
   }
 
-  constexpr auto size_impl() const {
+  constexpr auto __size_impl() const {
     return std::apply(
-        [](auto&&... bases) {
-          using size_type = std::common_type_t<std::ranges::range_size_t<decltype(bases)>...>;
-          return (static_cast<size_type>(std::ranges::size(bases)) * ...);
+        [](auto&&... __bases) {
+          using _SizeType = std::common_type_t<std::ranges::range_size_t<decltype(__bases)>...>;
+          return (static_cast<_SizeType>(std::ranges::size(__bases)) * ...);
         },
-        bases_);
+        __bases_);
   }
 };
 
-template <class... Vs>
-cartesian_product_view(Vs&&...) -> cartesian_product_view<views::all_t<Vs>...>;
+template <class... _Vs>
+cartesian_product_view(_Vs&&...) -> cartesian_product_view<views::all_t<_Vs>...>;
 
-template <input_range First, forward_range... Vs>
-  requires(view<First> && ... && view<Vs>)
-template <bool Const>
-class cartesian_product_view<First, Vs...>::iterator {
-  static constexpr auto get_iterator_tag() {
-    if constexpr (cartesian_product_is_random_access<Const, First, Vs...>)
+template <input_range _First, forward_range... _Vs>
+  requires(view<_First> && ... && view<_Vs>)
+template <bool _IsConst>
+class cartesian_product_view<_First, _Vs...>::__iterator {
+  static constexpr auto __get_iterator_tag() {
+    if constexpr (__cartesian_product_is_random_access<_IsConst, _First, _Vs...>)
       return random_access_iterator_tag{};
-    else if constexpr (cartesian_product_is_bidirectional<Const, First, Vs...>)
+    else if constexpr (__cartesian_product_is_bidirectional<_IsConst, _First, _Vs...>)
       return bidirectional_iterator_tag{};
-    else if constexpr (forward_range<__maybe_const<Const, First>>)
+    else if constexpr (forward_range<__maybe_const<_IsConst, _First>>)
       return forward_iterator_tag{};
     else
       return input_iterator_tag{};
@@ -187,266 +192,271 @@ class cartesian_product_view<First, Vs...>::iterator {
 
 public:
   using iterator_category = input_iterator_tag;
-  using iterator_concept  = decltype(get_iterator_tag());
-  using value_type = tuple<range_value_t<__maybe_const<Const, First>>, range_value_t<__maybe_const<Const, Vs>>...>;
+  using iterator_concept  = decltype(__get_iterator_tag());
+  using value_type =
+      tuple<range_value_t<__maybe_const<_IsConst, _First>>, range_value_t<__maybe_const<_IsConst, _Vs>>...>;
   using reference =
-      tuple<range_reference_t<__maybe_const<Const, First>>, range_reference_t<__maybe_const<Const, Vs>>...>;
-  using difference_type = std::common_type_t<range_difference_t<First>, range_difference_t<Vs>...>;
+      tuple<range_reference_t<__maybe_const<_IsConst, _First>>, range_reference_t<__maybe_const<_IsConst, _Vs>>...>;
+  using difference_type = std::common_type_t<range_difference_t<_First>, range_difference_t<_Vs>...>;
 
-  iterator() = default;
+  __iterator() = default;
 
-  constexpr iterator(iterator<!Const> i)
-    requires Const && (convertible_to<iterator_t<First>, iterator_t<const First>> && ... &&
-                       convertible_to<iterator_t<Vs>, iterator_t<const Vs>>)
-      : parent_(i.parent_), current_(std::move(i.current_)) {}
+  constexpr __iterator(__iterator<!_IsConst> __i)
+    requires _IsConst && (convertible_to<iterator_t<_First>, iterator_t<const _First>> && ... &&
+                          convertible_to<iterator_t<_Vs>, iterator_t<const _Vs>>)
+      : __parent_(__i.__parent_), __current_(std::move(__i.__current_)) {}
 
   [[nodiscard]] constexpr auto operator*() const {
-    return __tuple_transform([](auto& i) -> decltype(auto) { return *i; }, current_);
+    return __tuple_transform([](auto& __i) -> decltype(auto) { return *__i; }, __current_);
   }
 
-  constexpr iterator& operator++() {
-    next();
+  constexpr __iterator& operator++() {
+    __next();
     return *this;
   }
 
   constexpr void operator++(int) { ++*this; }
 
-  [[nodiscard]] constexpr iterator operator++(int)
-    requires forward_range<__maybe_const<Const, First>>
+  [[nodiscard]] constexpr __iterator operator++(int)
+    requires forward_range<__maybe_const<_IsConst, _First>>
   {
-    auto tmp = *this;
+    auto __tmp = *this;
     ++*this;
-    return tmp;
+    return __tmp;
   }
 
-  constexpr iterator& operator--()
-    requires cartesian_product_is_bidirectional<Const, First, Vs...>
+  constexpr __iterator& operator--()
+    requires __cartesian_product_is_bidirectional<_IsConst, _First, _Vs...>
   {
-    prev();
+    __prev();
     return *this;
   }
 
-  [[nodiscard]] constexpr iterator operator--(int)
-    requires cartesian_product_is_bidirectional<Const, First, Vs...>
+  [[nodiscard]] constexpr __iterator operator--(int)
+    requires __cartesian_product_is_bidirectional<_IsConst, _First, _Vs...>
   {
-    auto tmp = *this;
+    auto __tmp = *this;
     --*this;
-    return tmp;
+    return __tmp;
   }
 
-  constexpr iterator& operator+=(difference_type x)
-    requires cartesian_product_is_random_access<Const, First, Vs...>
+  constexpr __iterator& operator+=(difference_type __x)
+    requires __cartesian_product_is_random_access<_IsConst, _First, _Vs...>
   {
-    advance(x);
+    __advance(__x);
     return *this;
   }
 
-  constexpr iterator& operator-=(difference_type x)
-    requires cartesian_product_is_random_access<Const, First, Vs...>
+  constexpr __iterator& operator-=(difference_type __x)
+    requires __cartesian_product_is_random_access<_IsConst, _First, _Vs...>
   {
-    *this += -x;
+    *this += -__x;
     return *this;
   }
 
-  [[nodiscard]] constexpr reference operator[](difference_type n) const
-    requires cartesian_product_is_random_access<Const, First, Vs...>
+  [[nodiscard]] constexpr reference operator[](difference_type __n) const
+    requires __cartesian_product_is_random_access<_IsConst, _First, _Vs...>
   {
-    return *((*this) + n);
+    return *((*this) + __n);
   }
 
-  friend constexpr bool operator==(const iterator& x, const iterator& y)
-    requires equality_comparable<iterator_t<__maybe_const<Const, First>>>
+  friend constexpr bool operator==(const __iterator& __x, const __iterator& __y)
+    requires equality_comparable<iterator_t<__maybe_const<_IsConst, _First>>>
   {
-    return x.current_ == y.current_;
+    return __x.__current_ == __y.__current_;
   }
 
-  friend constexpr bool operator==(const iterator& x, default_sentinel_t) { return x.at_end(); }
+  friend constexpr bool operator==(const __iterator& __x, default_sentinel_t) { return __x.__at_end(); }
 
-  friend constexpr auto operator<=>(const iterator& x, const iterator& y)
-    requires __cartesian_product_all_random_access<Const, First, Vs...>
+  friend constexpr auto operator<=>(const __iterator& __x, const __iterator& __y)
+    requires __cartesian_product_all_random_access<_IsConst, _First, _Vs...>
   {
-    return x.current_ <=> y.current_;
+    return __x.__current_ <=> __y.__current_;
   }
 
-  [[nodiscard]] friend constexpr iterator operator+(const iterator& x, difference_type y)
-    requires cartesian_product_is_random_access<Const, First, Vs...>
+  [[nodiscard]] friend constexpr __iterator operator+(const __iterator& __x, difference_type __y)
+    requires __cartesian_product_is_random_access<_IsConst, _First, _Vs...>
   {
-    return iterator(x) += y;
+    return __iterator(__x) += __y;
   }
 
-  [[nodiscard]] friend constexpr iterator operator+(difference_type x, const iterator& y)
-    requires cartesian_product_is_random_access<Const, First, Vs...>
+  [[nodiscard]] friend constexpr __iterator operator+(difference_type __x, const __iterator& __y)
+    requires __cartesian_product_is_random_access<_IsConst, _First, _Vs...>
   {
-    return y + x;
+    return __y + __x;
   }
 
-  [[nodiscard]] friend constexpr iterator operator-(const iterator& x, difference_type y)
-    requires cartesian_product_is_random_access<Const, First, Vs...>
+  [[nodiscard]] friend constexpr __iterator operator-(const __iterator& __x, difference_type __y)
+    requires __cartesian_product_is_random_access<_IsConst, _First, _Vs...>
   {
-    return iterator(x) -= y;
+    return __iterator(__x) -= __y;
   }
 
-  [[nodiscard]] friend constexpr difference_type operator-(const iterator& x, const iterator& y)
-    requires cartesian_is_sized_sentinel<Const, iterator_t, First, Vs...>
+  [[nodiscard]] friend constexpr difference_type operator-(const __iterator& __x, const __iterator& __y)
+    requires __cartesian_is_sized_sentinel<_IsConst, iterator_t, _First, _Vs...>
   {
-    return x.distance_from(y.current_);
+    return __x.__distance_from(__y.__current_);
   }
 
-  [[nodiscard]] friend constexpr difference_type operator-(const iterator& i, default_sentinel_t)
-    requires cartesian_is_sized_sentinel<Const, sentinel_t, First, Vs...>
+  [[nodiscard]] friend constexpr difference_type operator-(const __iterator& __i, default_sentinel_t)
+    requires __cartesian_is_sized_sentinel<_IsConst, sentinel_t, _First, _Vs...>
   {
-    tuple end_tuple = [&b = i.parent_->bases_]<size_t... I>(index_sequence<I...>) {
-      return tuple{ranges::end(std::get<0>(b)), ranges::begin(std::get<1 + I>(b))...};
-    }(std::make_index_sequence<sizeof...(Vs)>{});
-    return i.distance_from(end_tuple);
+    tuple __end_tuple = [&__b = __i.__parent_->__bases_]<size_t... _Ip>(index_sequence<_Ip...>) {
+      return tuple{ranges::end(std::get<0>(__b)), ranges::begin(std::get<1 + _Ip>(__b))...};
+    }(std::make_index_sequence<sizeof...(_Vs)>{});
+    return __i.__distance_from(__end_tuple);
   }
 
-  [[nodiscard]] friend constexpr difference_type operator-(default_sentinel_t s, const iterator& i)
-    requires cartesian_is_sized_sentinel<Const, sentinel_t, First, Vs...>
+  [[nodiscard]] friend constexpr difference_type operator-(default_sentinel_t, const __iterator& __i)
+    requires __cartesian_is_sized_sentinel<_IsConst, sentinel_t, _First, _Vs...>
   {
-    return -(i - s);
+    return -(__i - default_sentinel);
   }
 
-  [[nodiscard]] friend constexpr auto iter_move(const iterator& i) noexcept(iter_move_noexcept_impl(i)) {
-    return __tuple_transform(ranges::iter_move, i.current_);
+  [[nodiscard]] friend constexpr auto iter_move(const __iterator& __i) noexcept(__iter_move_noexcept_impl(__i)) {
+    return __tuple_transform(ranges::iter_move, __i.__current_);
   }
 
-  friend constexpr void iter_swap(const iterator& l, const iterator& r) noexcept(iter_swap_noexcept_impl(l, r))
-    requires(indirectly_swappable<iterator_t<__maybe_const<Const, First>>> && ... &&
-             indirectly_swappable<iterator_t<__maybe_const<Const, Vs>>>)
+  friend constexpr void
+  iter_swap(const __iterator& __l, const __iterator& __r) noexcept(__iter_swap_noexcept_impl(__l, __r))
+    requires(indirectly_swappable<iterator_t<__maybe_const<_IsConst, _First>>> && ... &&
+             indirectly_swappable<iterator_t<__maybe_const<_IsConst, _Vs>>>)
   {
-    iter_swap_impl(l, r);
+    __iter_swap_impl(__l, __r);
   }
 
 private:
-  using Parent        = __maybe_const<Const, cartesian_product_view>;
-  Parent* parent_     = nullptr;
-  using MultiIterator = tuple<iterator_t<__maybe_const<Const, First>>, iterator_t<__maybe_const<Const, Vs>>...>;
-  MultiIterator current_;
+  using _Parent      = __maybe_const<_IsConst, cartesian_product_view>;
+  _Parent* __parent_ = nullptr;
+  using _MultiIter   = tuple<iterator_t<__maybe_const<_IsConst, _First>>, iterator_t<__maybe_const<_IsConst, _Vs>>...>;
+  _MultiIter __current_;
 
-  template <size_t N = sizeof...(Vs)>
-  constexpr void next() {
-    auto& it = std::get<N>(current_);
-    ++it;
-    if constexpr (N > 0) {
-      if (const auto& v = std::get<N>(parent_->bases_); it == ranges::end(v)) {
-        it = ranges::begin(v);
-        next<N - 1>();
+  template <size_t _Np = sizeof...(_Vs)>
+  constexpr void __next() {
+    auto& __it = std::get<_Np>(__current_);
+    ++__it;
+    if constexpr (_Np > 0) {
+      if (const auto& __v = std::get<_Np>(__parent_->__bases_); __it == ranges::end(__v)) {
+        __it = ranges::begin(__v);
+        __next<_Np - 1>();
       }
     }
   }
 
-  template <size_t N = sizeof...(Vs)>
-  constexpr void prev() {
-    auto& it = std::get<N>(current_);
-    if constexpr (N > 0) {
-      if (const auto& v = std::get<N>(parent_->bases_); it == ranges::begin(v)) {
-        it = cartesian_common_arg_end(v);
-        prev<N - 1>();
+  template <size_t _Np = sizeof...(_Vs)>
+  constexpr void __prev() {
+    auto& __it = std::get<_Np>(__current_);
+    if constexpr (_Np > 0) {
+      if (const auto& __v = std::get<_Np>(__parent_->__bases_); __it == ranges::begin(__v)) {
+        __it = __cartesian_common_arg_end(__v);
+        __prev<_Np - 1>();
       }
     }
-    --it;
+    --__it;
   }
 
-  template <auto N = sizeof...(Vs)>
-  constexpr void advance(difference_type x) {
-    if (x == 0)
+  template <auto _Np = sizeof...(_Vs)>
+  constexpr void __advance(difference_type __x) {
+    if (__x == 0)
       return;
 
-    const auto& v    = std::get<N>(parent_->bases_);
-    auto& it         = std::get<N>(current_);
-    const auto sz    = static_cast<difference_type>(std::ranges::size(v));
-    const auto first = ranges::begin(v);
+    const auto& __v    = std::get<_Np>(__parent_->__bases_);
+    auto& __it         = std::get<_Np>(__current_);
+    const auto __sz    = static_cast<difference_type>(std::ranges::size(__v));
+    const auto __first = ranges::begin(__v);
 
-    if (sz > 0) {
-      const auto idx = static_cast<difference_type>(std::distance(first, it));
-      x += idx;
+    if (__sz > 0) {
+      const auto __idx = static_cast<difference_type>(std::distance(__first, __it));
+      __x += __idx;
 
-      difference_type mod;
-      if constexpr (N > 0) {
-        difference_type div = x / sz;
-        mod                 = x % sz;
-        if (mod < 0) {
-          mod += sz;
-          div--;
+      difference_type __mod;
+      if constexpr (_Np > 0) {
+        difference_type __div = __x / __sz;
+        __mod                 = __x % __sz;
+        if (__mod < 0) {
+          __mod += __sz;
+          __div--;
         }
-        advance<N - 1>(div);
+        __advance<_Np - 1>(__div);
       } else {
-        mod = (x >= 0 && x < sz) ? x : sz;
+        __mod = (__x >= 0 && __x < __sz) ? __x : __sz;
       }
-      it = std::next(first, mod);
+      __it = std::next(__first, __mod);
 
     } else {
-      if constexpr (N > 0) {
-        advance<N - 1>(x);
+      if constexpr (_Np > 0) {
+        __advance<_Np - 1>(__x);
       }
-      it = first;
+      __it = __first;
     }
   }
 
-  template <auto N = sizeof...(Vs)>
-  constexpr bool at_end() const {
-    if (std::get<N>(current_) == ranges::end(std::get<N>(parent_->bases_)))
+  template <auto _Np = sizeof...(_Vs)>
+  constexpr bool __at_end() const {
+    if (std::get<_Np>(__current_) == ranges::end(std::get<_Np>(__parent_->__bases_)))
       return true;
-    if constexpr (N > 0)
-      return at_end<N - 1>();
+    if constexpr (_Np > 0)
+      return __at_end<_Np - 1>();
     return false;
   }
 
-  template <class Tuple>
-  constexpr difference_type distance_from(const Tuple& t) const {
-    return scaled_sum(t);
+  template <class _Tuple>
+  constexpr difference_type __distance_from(const _Tuple& __t) const {
+    return __scaled_sum(__t);
   }
 
-  template <auto N>
-  constexpr difference_type scaled_size() const {
-    if constexpr (N <= sizeof...(Vs))
-      return static_cast<difference_type>(ranges::size(std::get<N>(parent_->bases_))) * scaled_size<N + 1>();
+  template <auto _Np>
+  constexpr difference_type __scaled_size() const {
+    if constexpr (_Np <= sizeof...(_Vs))
+      return static_cast<difference_type>(ranges::size(std::get<_Np>(__parent_->__bases_))) *
+             __scaled_size<_Np + 1>();
     return static_cast<difference_type>(1);
   }
 
-  template <auto N>
-  constexpr difference_type scaled_distance(const auto& t) const {
-    return static_cast<difference_type>(std::get<N>(current_) - std::get<N>(t)) * scaled_size<N + 1>();
+  template <auto _Np>
+  constexpr difference_type __scaled_distance(const auto& __t) const {
+    return static_cast<difference_type>(std::get<_Np>(__current_) - std::get<_Np>(__t)) *
+           __scaled_size<_Np + 1>();
   }
 
-  template <auto N = 0>
-  constexpr difference_type scaled_sum(const auto& t) const {
-    if constexpr (N <= sizeof...(Vs))
-      return scaled_distance<N>(t) + scaled_sum<N + 1>(t);
+  template <auto _Np = 0>
+  constexpr difference_type __scaled_sum(const auto& __t) const {
+    if constexpr (_Np <= sizeof...(_Vs))
+      return __scaled_distance<_Np>(__t) + __scaled_sum<_Np + 1>(__t);
     return static_cast<difference_type>(0);
   }
 
-  constexpr iterator(Parent& parent, MultiIterator current)
-      : parent_(std::addressof(parent)), current_(std::move(current)) {}
+  constexpr __iterator(_Parent& __parent, _MultiIter __current)
+      : __parent_(std::addressof(__parent)), __current_(std::move(__current)) {}
 
-  template <auto N = sizeof...(Vs)>
-  static constexpr bool iter_move_noexcept_impl(const iterator& i) {
-    if (not noexcept(std::ranges::iter_move(std::get<N>(i.current_))))
+  template <auto _Np = sizeof...(_Vs)>
+  static constexpr bool __iter_move_noexcept_impl(const __iterator& __i) {
+    if (not noexcept(std::ranges::iter_move(std::get<_Np>(__i.__current_))))
       return false;
-    if constexpr (N > 0)
-      return iter_move_noexcept_impl<N - 1>(i);
+    if constexpr (_Np > 0)
+      return __iter_move_noexcept_impl<_Np - 1>(__i);
 
     return std::is_nothrow_move_constructible_v<
-               std::ranges::range_rvalue_reference_t<__maybe_const<Const, First>>> and
-           (std::is_nothrow_move_constructible_v<std::ranges::range_rvalue_reference_t<__maybe_const<Const, Vs>>> and
+               std::ranges::range_rvalue_reference_t<__maybe_const<_IsConst, _First>>> and
+           (std::is_nothrow_move_constructible_v<
+                std::ranges::range_rvalue_reference_t<__maybe_const<_IsConst, _Vs>>> and
             ...);
   }
 
-  template <auto i = sizeof...(Vs)>
-  static constexpr bool iter_swap_noexcept_impl(const iterator& l, const iterator& r) {
-    if (not noexcept(std::ranges::iter_swap(std::get<i>(l.current_), std::get<i>(r.current_))))
+  template <auto _Ip = sizeof...(_Vs)>
+  static constexpr bool __iter_swap_noexcept_impl(const __iterator& __l, const __iterator& __r) {
+    if (not noexcept(std::ranges::iter_swap(std::get<_Ip>(__l.__current_), std::get<_Ip>(__r.__current_))))
       return false;
-    if constexpr (i > 0)
-      return iter_move_noexcept_impl<i - 1>(i);
+    if constexpr (_Ip > 0)
+      return __iter_move_noexcept_impl<_Ip - 1>(__l);
     return true;
   }
 
-  template <auto N = sizeof...(Vs)>
-  static constexpr void iter_swap_impl(const iterator& l, const iterator& r) {
-    ranges::iter_swap(std::get<N>(l.current_), std::get<N>(r.current_));
-    if constexpr (N > 0)
-      iter_swap_impl<N - 1>(l, r);
+  template <auto _Np = sizeof...(_Vs)>
+  static constexpr void __iter_swap_impl(const __iterator& __l, const __iterator& __r) {
+    ranges::iter_swap(std::get<_Np>(__l.__current_), std::get<_Np>(__r.__current_));
+    if constexpr (_Np > 0)
+      __iter_swap_impl<_Np - 1>(__l, __r);
   }
 };
 
