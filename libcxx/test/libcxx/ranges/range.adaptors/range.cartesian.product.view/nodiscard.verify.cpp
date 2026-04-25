@@ -154,6 +154,15 @@ void test_iterator() {
     // expected-warning@+1 {{ignoring return value of function declared with 'nodiscard' attribute}}
     iter - 0;
   }
+
+  { // friend constexpr difference_type operator-(const iterator&, const iterator&)
+    // requires cartesian_is_sized_sentinel<Const, iterator_t, First, Vs...>
+    static_assert(std::ranges::cartesian_is_sized_sentinel<true, std::ranges::iterator_t, ConstAccessibleView>);
+    const std::ranges::cartesian_product_view<ConstAccessibleView> view{ConstAccessibleView{}};
+    const auto iter = view.begin();
+    // expected-warning@+1 {{ignoring return value of function declared with 'nodiscard' attribute}}
+    iter - iter;
+  }
 }
 
 void test() {

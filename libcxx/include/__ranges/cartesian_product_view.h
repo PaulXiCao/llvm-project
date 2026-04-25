@@ -286,7 +286,7 @@ public:
     return iterator(x) -= y;
   }
 
-  friend constexpr difference_type operator-(const iterator& x, const iterator& y)
+  [[nodiscard]] friend constexpr difference_type operator-(const iterator& x, const iterator& y)
     requires cartesian_is_sized_sentinel<Const, iterator_t, First, Vs...>
   {
     return x.distance_from(y.current_);
