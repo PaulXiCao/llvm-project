@@ -10,17 +10,17 @@
 #define _LIBCPP___RANGES_CARTESIAN_PRODUCT_VIEW_H
 
 #include <__config>
-#include <__iterator/access.h> // begin
+#include <__iterator/access.h>
 #include <__iterator/default_sentinel.h>
 #include <__iterator/distance.h>
 #include <__iterator/iter_move.h>
 #include <__iterator/next.h>
 #include <__memory/addressof.h>
-#include <__ranges/concepts.h> // forward_range, view, range_size_t, sized_range, ...
-#include <__ranges/zip_view.h> // tuple_transform
+#include <__ranges/concepts.h>
+#include <__ranges/zip_view.h>
 #include <__type_traits/maybe_const.h>
-#include <tuple>       // apply
-#include <type_traits> // common_type_t
+#include <tuple>
+#include <type_traits>
 
 #if !defined(_LIBCPP_HAS_NO_PRAGMA_SYSTEM_HEADER)
 #  pragma GCC system_header
