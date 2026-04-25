@@ -428,8 +428,8 @@ private:
       return iter_move_noexcept_impl<N - 1>(i);
 
     return std::is_nothrow_move_constructible_v<
-               std::ranges::range_rvalue_reference_t<__maybe_const<Const, First>>>() and
-           (std::is_nothrow_move_constructible_v<std::ranges::range_rvalue_reference_t<__maybe_const<Const, Vs>>>() and
+               std::ranges::range_rvalue_reference_t<__maybe_const<Const, First>>> and
+           (std::is_nothrow_move_constructible_v<std::ranges::range_rvalue_reference_t<__maybe_const<Const, Vs>>> and
             ...);
   }
 
