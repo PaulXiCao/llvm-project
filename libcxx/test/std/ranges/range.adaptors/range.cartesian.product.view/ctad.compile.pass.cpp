@@ -11,7 +11,6 @@
 // template <class... Vs>
 // cartesian_product_view(Vs&&...) -> cartesian_product_view<views::all_t<Vs>...>;
 
-#include <cassert>
 #include <ranges>
 #include <utility>
 
@@ -26,16 +25,31 @@ struct View : std::ranges::view_base {
 };
 
 void testCTAD() {
+  // single Container -> owning_view<Container>
   static_assert(std::is_same_v<decltype(std::ranges::cartesian_product_view(Container{})),
                                std::ranges::cartesian_product_view<std::ranges::owning_view<Container>>>);
 
+  // Container + View
   static_assert(std::is_same_v<decltype(std::ranges::cartesian_product_view(Container{}, View{})),
                                std::ranges::cartesian_product_view<std::ranges::owning_view<Container>, View>>);
 
+  // lvalue Container -> ref_view<Container>
   Container c{};
   static_assert(
       std::is_same_v<
           decltype(std::ranges::cartesian_product_view(Container{}, View{}, c)),
           std::ranges::
               cartesian_product_view<std::ranges::owning_view<Container>, View, std::ranges::ref_view<Container>>>);
+
+  // 4-range CTAD with mix of view, lvalue container, rvalue container
+  static_assert(std::is_same_v<decltype(std::ranges::cartesian_product_view(View{}, c, Container{}, View{})),
+                               std::ranges::cartesian_product_view<View,
+                                                                   std::ranges::ref_view<Container>,
+                                                                   std::ranges::owning_view<Container>,
+                                                                   View>>);
+
+  // CTAD with iota_view and single_view
+  static_assert(std::is_same_v<
+                decltype(std::ranges::cartesian_product_view(std::views::iota(0, 5), std::ranges::single_view{1})),
+                std::ranges::cartesian_product_view<std::ranges::iota_view<int, int>, std::ranges::single_view<int>>>);
 }
