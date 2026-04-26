@@ -10,8 +10,10 @@
 
 // constexpr explicit cartesian_product_view(First first_base, Vs... bases);
 
+#include <cassert>
 #include <ranges>
 #include <tuple>
+#include <utility>
 
 #include "../range_adaptor_types.h"
 
@@ -21,7 +23,7 @@ void conversion_test(T);
 template <class T, class... Args>
 concept implicitly_constructible_from = requires(Args&&... args) { conversion_test<T>({std::move(args)...}); };
 
-// test constructor is explicit
+// The constructor is explicit (cannot be invoked through copy-list-initialisation).
 static_assert(std::constructible_from<std::ranges::cartesian_product_view<SimpleCommon>, SimpleCommon>);
 static_assert(!implicitly_constructible_from<std::ranges::cartesian_product_view<SimpleCommon>, SimpleCommon>);
 
@@ -31,6 +33,14 @@ static_assert(std::constructible_from<std::ranges::cartesian_product_view<Simple
 static_assert(!implicitly_constructible_from<std::ranges::cartesian_product_view<SimpleCommon, SimpleCommon>,
                                              SimpleCommon,
                                              SimpleCommon>);
+
+// 4-range constructor is also explicit.
+static_assert(std::constructible_from<
+              std::ranges::cartesian_product_view<SimpleCommon, SimpleCommon, SimpleCommon, SimpleCommon>,
+              SimpleCommon,
+              SimpleCommon,
+              SimpleCommon,
+              SimpleCommon>);
 
 struct MoveAwareView : std::ranges::view_base {
   int moves                 = 0;
@@ -57,31 +67,31 @@ constexpr bool test() {
   int buffer[]  = {1, 2, 3, 4, 5, 6, 7, 8};
   int buffer2[] = {9, 8, 7, 6};
 
-  { // constructor from views
+  { // construction from views
     std::ranges::cartesian_product_view v(
-        SizedRandomAccessView{buffer}, std::views::iota(0), std::ranges::single_view(2.));
+        SizedRandomAccessView{buffer}, std::views::iota(0, 5), std::ranges::single_view(2.));
     assert(*v.begin() == std::make_tuple(1, 0, 2.0));
   }
 
-  { // arguments are moved once
+  { // 4-range construction
+    std::ranges::cartesian_product_view v(
+        SizedRandomAccessView{buffer}, std::views::iota(0, 2), std::ranges::single_view(2.), std::views::iota(10, 13));
+    assert(v.size() == 8u * 2u * 1u * 3u);
+    auto [a, b, c, d] = *v.begin();
+    assert(a == 1 && b == 0 && c == 2.0 && d == 10);
+  }
+
+  { // each argument is moved exactly once into the bases tuple
     MoveAwareView mv;
     std::ranges::cartesian_product_view v{std::move(mv), MoveAwareView{}};
     auto [numMoves1, numMoves2] = *v.begin();
-    assert(numMoves1 == 2); // one move from the local variable to parameter, one move from parameter to member
+    assert(numMoves1 == 2); // local -> parameter, parameter -> member
     assert(numMoves2 == 1);
   }
 
-  { // input and forward
-    constructorTest<InputCommonView, ForwardSizedView>(buffer, buffer2);
-  }
-
-  { // bidi and random_access
-    constructorTest<BidiCommonView, SizedRandomAccessView>(buffer, buffer2);
-  }
-
-  { // contiguous
-    constructorTest<ContiguousCommonView, ContiguousCommonView>(buffer, buffer2);
-  }
+  constructorTest<InputCommonView, ForwardSizedView>(buffer, buffer2);
+  constructorTest<BidiCommonView, SizedRandomAccessView>(buffer, buffer2);
+  constructorTest<ContiguousCommonView, ContiguousCommonView>(buffer, buffer2);
 
   return true;
 }
