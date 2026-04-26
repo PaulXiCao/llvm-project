@@ -9,10 +9,11 @@
 // REQUIRES: std-at-least-c++23
 
 // cartesian_product_view() = default;
-
-#include <ranges>
+//
+// The defaulted default constructor requires every underlying view to be default-constructible.
 
 #include <cassert>
+#include <ranges>
 #include <type_traits>
 #include <utility>
 
@@ -34,22 +35,23 @@ struct NoDefaultCtrView : std::ranges::view_base {
   int* end() const;
 };
 
-// The default constructor requires all underlying views to be default constructible.
-// It is implicitly required by the tuple's constructor. If any of the iterators are
-// not default constructible, cartesian product iterator's =default would be implicitly deleted.
-static_assert(std::is_default_constructible_v<std::ranges::cartesian_product_view<DefaultConstructibleView>>);
-static_assert(std::is_default_constructible_v<
+// The default constructor is only available when *every* base view is default-constructible.
+static_assert(std::default_initializable<std::ranges::cartesian_product_view<DefaultConstructibleView>>);
+static_assert(std::default_initializable<
               std::ranges::cartesian_product_view<DefaultConstructibleView, DefaultConstructibleView>>);
+static_assert(std::default_initializable<std::ranges::cartesian_product_view<DefaultConstructibleView,
+                                                                             DefaultConstructibleView,
+                                                                             DefaultConstructibleView>>);
+static_assert(!std::default_initializable<std::ranges::cartesian_product_view<NoDefaultCtrView>>);
 static_assert(
-    !std::is_default_constructible_v<std::ranges::cartesian_product_view<DefaultConstructibleView, NoDefaultCtrView>>);
+    !std::default_initializable<std::ranges::cartesian_product_view<DefaultConstructibleView, NoDefaultCtrView>>);
 static_assert(
-    !std::is_default_constructible_v<std::ranges::cartesian_product_view<NoDefaultCtrView, NoDefaultCtrView>>);
-static_assert(!std::is_default_constructible_v<std::ranges::cartesian_product_view<NoDefaultCtrView>>);
+    !std::default_initializable<std::ranges::cartesian_product_view<NoDefaultCtrView, DefaultConstructibleView>>);
 
 constexpr bool test() {
-  {
+  { // 2-range default construction iterates correctly
     using View = std::ranges::cartesian_product_view<DefaultConstructibleView, DefaultConstructibleView>;
-    View v     = View(); // the default constructor is not explicit
+    View v     = View(); // not explicit
     assert(v.size() == 9);
     auto it     = v.begin();
     using Value = std::tuple<const int&, const int&>;
@@ -57,6 +59,15 @@ constexpr bool test() {
     assert(*it++ == Value(1, 2));
     assert(*it++ == Value(1, 3));
     assert(*it++ == Value(2, 1));
+  }
+
+  { // 3-range default construction
+    using View = std::ranges::
+        cartesian_product_view<DefaultConstructibleView, DefaultConstructibleView, DefaultConstructibleView>;
+    View v = {};
+    assert(v.size() == 27);
+    auto [a, b, c] = *v.begin();
+    assert(a == 1 && b == 1 && c == 1);
   }
 
   return true;
