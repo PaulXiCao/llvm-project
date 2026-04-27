@@ -12,6 +12,7 @@
 //   requires Const && (convertible_to<iterator_t<First>, iterator_t<const First>> && ...
 //                   && convertible_to<iterator_t<Vs>,    iterator_t<const Vs>>);
 
+#include <array>
 #include <cassert>
 #include <ranges>
 #include <tuple>
@@ -28,7 +29,7 @@ static_assert(!std::convertible_to<std::ranges::iterator_t<ConstIterIncompatible
                                    std::ranges::iterator_t<const ConstIterIncompatibleView>>);
 
 constexpr bool test() {
-  int buffer[3] = {1, 2, 3};
+  std::array buffer{1, 2, 3};
 
   { // non-const to const conversion succeeds when all underlying iterators are convertible
     std::ranges::cartesian_product_view v(NonSimpleCommon{buffer}, NonSimpleCommon{buffer});
