@@ -22,7 +22,7 @@
 template <class T>
 concept HasSize = requires(T&& t) { t.size(); };
 
-bool test() {
+constexpr bool test() {
   { // example from cppreference
     constexpr static auto w = {1};
     constexpr static auto x = {2, 3};
