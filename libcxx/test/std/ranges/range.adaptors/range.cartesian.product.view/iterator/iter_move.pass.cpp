@@ -25,9 +25,9 @@ struct ThrowingMove {
 
 constexpr bool test() {
   { // underlying iter_move is noexcept on common ranges
-    std::array a1{1, 2, 3, 4};
-    const std::array a2{3.0, 4.0};
-    std::ranges::cartesian_product_view v(a1, a2, std::views::iota(3L, 6L));
+    std::array a{1, 2, 3, 4};
+    const std::array b{3.0, 4.0};
+    std::ranges::cartesian_product_view v(a, b, std::views::iota(3L, 6L));
     auto it = v.begin();
 
     assert(std::ranges::iter_move(it) == std::make_tuple(1, 3.0, 3L));

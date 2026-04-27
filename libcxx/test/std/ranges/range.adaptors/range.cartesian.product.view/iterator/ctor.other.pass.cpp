@@ -29,34 +29,34 @@ static_assert(!std::convertible_to<std::ranges::iterator_t<ConstIterIncompatible
                                    std::ranges::iterator_t<const ConstIterIncompatibleView>>);
 
 constexpr bool test() {
-  std::array buffer{1, 2, 3};
+  std::array a{1, 2, 3};
 
   { // non-const to const conversion succeeds when all underlying iterators are convertible
-    std::ranges::cartesian_product_view v(NonSimpleCommon{buffer}, NonSimpleCommon{buffer});
-    auto iter1                                       = v.begin();
-    std::ranges::iterator_t<const decltype(v)> iter2 = iter1;
-    assert(iter1 == iter2);
+    std::ranges::cartesian_product_view v(NonSimpleCommon{a}, NonSimpleCommon{a});
+    auto it1                                       = v.begin();
+    std::ranges::iterator_t<const decltype(v)> it2 = it1;
+    assert(it1 == it2);
 
-    static_assert(!std::is_same_v<decltype(iter1), decltype(iter2)>);
+    static_assert(!std::is_same_v<decltype(it1), decltype(it2)>);
     // Cannot go the other way (const -> non-const).
-    static_assert(!std::constructible_from<decltype(iter1), decltype(iter2)>);
+    static_assert(!std::constructible_from<decltype(it1), decltype(it2)>);
   }
 
   { // const-incompatible underlying iterator: neither direction is constructible
-    std::ranges::cartesian_product_view v(ConstIterIncompatibleView{buffer});
-    auto iter1 = v.begin();
-    auto iter2 = std::as_const(v).begin();
+    std::ranges::cartesian_product_view v(ConstIterIncompatibleView{a});
+    auto it1 = v.begin();
+    auto it2 = std::as_const(v).begin();
 
-    static_assert(!std::is_same_v<decltype(iter1), decltype(iter2)>);
-    static_assert(!std::constructible_from<decltype(iter1), decltype(iter2)>);
-    static_assert(!std::constructible_from<decltype(iter2), decltype(iter1)>);
+    static_assert(!std::is_same_v<decltype(it1), decltype(it2)>);
+    static_assert(!std::constructible_from<decltype(it1), decltype(it2)>);
+    static_assert(!std::constructible_from<decltype(it2), decltype(it1)>);
   }
 
   { // 3-range conversion
-    std::ranges::cartesian_product_view v(NonSimpleCommon{buffer}, NonSimpleCommon{buffer}, NonSimpleCommon{buffer});
-    auto iter1                                       = v.begin();
-    std::ranges::iterator_t<const decltype(v)> iter2 = iter1;
-    assert(iter1 == iter2);
+    std::ranges::cartesian_product_view v(NonSimpleCommon{a}, NonSimpleCommon{a}, NonSimpleCommon{a});
+    auto it1                                       = v.begin();
+    std::ranges::iterator_t<const decltype(v)> it2 = it1;
+    assert(it1 == it2);
   }
 
   return true;

@@ -14,6 +14,7 @@
 // friend constexpr auto operator<=>(const iterator& x, const iterator& y)
 //   requires cartesian-product-all-random-access<...>;
 
+#include <array>
 #include <cassert>
 #include <compare>
 #include <concepts>
@@ -91,9 +92,9 @@ constexpr bool test() {
   }
 
   { // input_range -- only == is available, no relational ops, no <=>
-    int b1[1] = {1};
-    int b2[2] = {10, 20};
-    std::ranges::cartesian_product_view v(InputCommonView{b1}, ForwardSizedView{b2});
+    std::array a{1};
+    std::array b{10, 20};
+    std::ranges::cartesian_product_view v(InputCommonView{a}, ForwardSizedView{b});
     using View = decltype(v);
     static_assert(!std::ranges::forward_range<View>);
     static_assert(std::ranges::input_range<View>);
@@ -105,9 +106,9 @@ constexpr bool test() {
   }
 
   { // forward+sized -- equality but no <=> (because not all-random-access)
-    int b1[2] = {1, 2};
-    int b2[2] = {3, 4};
-    std::ranges::cartesian_product_view v(ForwardSizedView{b1}, ForwardSizedView{b2});
+    std::array a{1, 2};
+    std::array b{3, 4};
+    std::ranges::cartesian_product_view v(ForwardSizedView{a}, ForwardSizedView{b});
     using Iter = std::ranges::iterator_t<decltype(v)>;
     static_assert(std::equality_comparable<Iter>);
     static_assert(!std::three_way_comparable<Iter>);
@@ -120,8 +121,8 @@ constexpr bool test() {
   }
 
   { // iterator vs default_sentinel_t -- at-end check via OR-fold over all positions
-    int b1[3] = {1, 2, 3};
-    std::ranges::cartesian_product_view v(b1);
+    std::array a{1, 2, 3};
+    std::ranges::cartesian_product_view v(a);
     auto it = v.begin();
     assert(it != std::default_sentinel);
     ++it;
@@ -132,10 +133,10 @@ constexpr bool test() {
   }
 
   { // sentinel is reached as soon as any range is at end (empty middle range)
-    int outer[2] = {1, 2};
+    std::array a{1, 2};
     std::ranges::empty_view<int> empty;
-    int inner[2] = {3, 4};
-    std::ranges::cartesian_product_view v(outer, empty, inner);
+    std::array b{3, 4};
+    std::ranges::cartesian_product_view v(a, empty, b);
     auto it = v.begin();
     // The middle iterator is at end of empty range immediately, so begin == default_sentinel.
     assert(it == std::default_sentinel);

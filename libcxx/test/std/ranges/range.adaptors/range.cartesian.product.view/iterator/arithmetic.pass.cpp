@@ -30,17 +30,17 @@ template <class T, class U>
 concept CanMinusEqual = requires(T& t, const U& u) { t -= u; };
 
 constexpr bool test() {
-  int b1[3] = {1, 2, 3};
-  int b2[4] = {10, 20, 30, 40};
+  std::array a{1, 2, 3};
+  std::array b{10, 20, 30, 40};
 
   { // operator+(x, n), operator+(n, x), operator+=
-    std::ranges::cartesian_product_view v(b1, b2);
+    std::ranges::cartesian_product_view v(a, b);
     auto it1 = v.begin();
 
-    const auto it2 = it1 + 5; // (b1[1], b2[1])
+    const auto it2 = it1 + 5; // (a[1], b[1])
     const auto [x2, y2] = *it2;
-    assert(&x2 == &b1[1]);
-    assert(&y2 == &b2[1]);
+    assert(&x2 == &a[1]);
+    assert(&y2 == &b[1]);
 
     assert((5 + it1) == it2);
 
@@ -52,13 +52,13 @@ constexpr bool test() {
   }
 
   { // operator-(x, n), operator-=
-    std::ranges::cartesian_product_view v(b1, b2);
+    std::ranges::cartesian_product_view v(a, b);
     auto it1 = v.end();
 
-    auto it2 = it1 - 5; // total size 12, so `end - 5 = (b1[2], b2[3]) - 4 = (b1[1], b2[3])`
+    auto it2 = it1 - 5; // total size 12, so `end - 5 = (a[2], b[3]) - 4 = (a[1], b[3])`
     auto [x2, y2] = *it2;
-    assert(&x2 == &b1[1]);
-    assert(&y2 == &b2[3]);
+    assert(&x2 == &a[1]);
+    assert(&y2 == &b[3]);
 
     it1 -= 5;
     assert(it1 == it2);
@@ -68,42 +68,42 @@ constexpr bool test() {
   }
 
   { // operator-(x, y) -- Cartesian distance
-    std::ranges::cartesian_product_view v(b1, b2);
+    std::ranges::cartesian_product_view v(a, b);
     assert((v.end() - v.begin()) == 12);
 
-    auto it1 = v.begin() + 3; // (b1[0], b2[3])
-    auto it2 = v.begin() + 7; // (b1[1], b2[3])
+    auto it1 = v.begin() + 3; // (a[0], b[3])
+    auto it2 = v.begin() + 7; // (a[1], b[3])
     assert((it2 - it1) == 4);
     assert((it1 - it2) == -4);
   }
 
   { // crossing wrap boundaries -- large positive offset
-    std::ranges::cartesian_product_view v(b1, b2);
+    std::ranges::cartesian_product_view v(a, b);
     auto it1    = v.begin();
     auto it2    = it1 + 11; // last element
     auto [x, y] = *it2;
-    assert(&x == &b1[2]);
-    assert(&y == &b2[3]);
+    assert(&x == &a[2]);
+    assert(&y == &b[3]);
   }
 
   { // negative offset on iterator near begin
-    std::ranges::cartesian_product_view v(b1, b2);
-    auto it1    = v.begin() + 6; // (b1[1], b2[2])
-    auto it2    = it1 + (-2);    // (b1[1], b2[0])
+    std::ranges::cartesian_product_view v(a, b);
+    auto it1    = v.begin() + 6; // (a[1], b[2])
+    auto it2    = it1 + (-2);    // (a[1], b[0])
     auto [x, y] = *it2;
-    assert(&x == &b1[1]);
-    assert(&y == &b2[0]);
+    assert(&x == &a[1]);
+    assert(&y == &b[0]);
   }
 
   { // 3-range distance
-    int b3[2] = {100, 200};
-    std::ranges::cartesian_product_view v(b1, b2, b3); // size = 3*4*2 = 24
+    std::array c{100, 200};
+    std::ranges::cartesian_product_view v(a, b, c); // size = 3*4*2 = 24
     assert(v.end() - v.begin() == 24);
     assert((v.begin() + 24) == v.end());
   }
 
   { // not random-access (forward+sized) -> +=, -=, +, - (with diff) not available, but x - y is
-    std::ranges::cartesian_product_view v(ForwardSizedView{b1}, ForwardSizedView{b2});
+    std::ranges::cartesian_product_view v(ForwardSizedView{a}, ForwardSizedView{b});
     using Iter = decltype(v.begin());
     static_assert(!std::invocable<std::plus<>, Iter, std::ptrdiff_t>);
     static_assert(!std::invocable<std::plus<>, std::ptrdiff_t, Iter>);
@@ -115,7 +115,7 @@ constexpr bool test() {
   }
 
   { // not sized-sentinel (input range) -> x - y is not available
-    std::ranges::cartesian_product_view v(InputCommonView{b1}, ForwardSizedView{b2});
+    std::ranges::cartesian_product_view v(InputCommonView{a}, ForwardSizedView{b});
     using Iter = decltype(v.begin());
     static_assert(!std::invocable<std::minus<>, Iter, Iter>);
   }
