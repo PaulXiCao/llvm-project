@@ -16,6 +16,7 @@
 //   using difference_type   = common_type_t<range_difference_t<...>>;
 
 #include <array>
+#include <array>
 #include <ranges>
 #include <tuple>
 #include <utility>
