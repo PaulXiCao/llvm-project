@@ -441,7 +441,7 @@ private:
     if (not noexcept(std::ranges::iter_swap(std::get<_Ip>(__l.__current_), std::get<_Ip>(__r.__current_))))
       return false;
     if constexpr (_Ip > 0)
-      return __iter_move_noexcept_impl<_Ip - 1>(__l);
+      return __iter_swap_noexcept_impl<_Ip - 1>(__l, __r);
     return true;
   }
 
