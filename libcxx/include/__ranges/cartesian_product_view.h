@@ -185,6 +185,9 @@ class cartesian_product_view<_First, _Vs...>::__iterator {
 
   friend cartesian_product_view;
 
+  template <bool>
+  friend class cartesian_product_view<_First, _Vs...>::__iterator;
+
 public:
   using iterator_category = input_iterator_tag;
   using iterator_concept  = decltype(__get_iterator_tag());
