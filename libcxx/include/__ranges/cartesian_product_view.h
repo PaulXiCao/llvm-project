@@ -17,6 +17,7 @@
 #include <__iterator/next.h>
 #include <__memory/addressof.h>
 #include <__ranges/concepts.h>
+#include <__ranges/single_view.h>
 #include <__ranges/zip_view.h>
 #include <__type_traits/maybe_const.h>
 #include <tuple>
