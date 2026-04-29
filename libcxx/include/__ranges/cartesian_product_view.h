@@ -62,7 +62,7 @@ concept __cartesian_is_sized_sentinel =
       sized_sentinel_for<iterator_t<__maybe_const<_Const, _Vs>>, iterator_t<__maybe_const<_Const, _Vs>>>));
 
 template <__cartesian_product_common_arg _Rp>
-constexpr auto __cartesian_common_arg_end(_Rp& __r) {
+_LIBCPP_HIDE_FROM_ABI constexpr auto __cartesian_common_arg_end(_Rp& __r) {
   if constexpr (common_range<_Rp>) {
     return ranges::end(__r);
   } else {
@@ -84,45 +84,45 @@ private:
   class __iterator;
 
 public:
-  constexpr cartesian_product_view() = default;
-  constexpr explicit cartesian_product_view(_First __first_base, _Vs... __bases)
+  _LIBCPP_HIDE_FROM_ABI constexpr cartesian_product_view() = default;
+  _LIBCPP_HIDE_FROM_ABI constexpr explicit cartesian_product_view(_First __first_base, _Vs... __bases)
       : __bases_{std::move(__first_base), std::move(__bases)...} {}
 
-  [[nodiscard]] constexpr __iterator<false> begin()
+  [[nodiscard]] _LIBCPP_HIDE_FROM_ABI constexpr __iterator<false> begin()
     requires(!__simple_view<_First> || ... || !__simple_view<_Vs>)
   {
     return __iterator<false>(*this, __tuple_transform(ranges::begin, __bases_));
   }
 
-  [[nodiscard]] constexpr __iterator<true> begin() const
+  [[nodiscard]] _LIBCPP_HIDE_FROM_ABI constexpr __iterator<true> begin() const
     requires(range<const _First> && ... && range<const _Vs>)
   {
     return __iterator<true>(*this, __tuple_transform(ranges::begin, __bases_));
   }
 
-  [[nodiscard]] constexpr __iterator<false> end()
+  [[nodiscard]] _LIBCPP_HIDE_FROM_ABI constexpr __iterator<false> end()
     requires((!__simple_view<_First> || ... || !__simple_view<_Vs>) && __cartesian_product_is_common<_First, _Vs...>)
   {
     constexpr bool __is_const_ = false;
     return __end_impl<__is_const_>(*this);
   }
 
-  [[nodiscard]] constexpr __iterator<true> end() const
+  [[nodiscard]] _LIBCPP_HIDE_FROM_ABI constexpr __iterator<true> end() const
     requires __cartesian_product_is_common<const _First, const _Vs...>
   {
     constexpr bool __is_const_ = true;
     return __end_impl<__is_const_>(*this);
   }
 
-  [[nodiscard]] constexpr default_sentinel_t end() const noexcept { return default_sentinel; }
+  [[nodiscard]] _LIBCPP_HIDE_FROM_ABI constexpr default_sentinel_t end() const noexcept { return default_sentinel; }
 
-  [[nodiscard]] constexpr auto size()
+  [[nodiscard]] _LIBCPP_HIDE_FROM_ABI constexpr auto size()
     requires __cartesian_product_is_sized<_First, _Vs...>
   {
     return __size_impl();
   }
 
-  [[nodiscard]] constexpr auto size() const
+  [[nodiscard]] _LIBCPP_HIDE_FROM_ABI constexpr auto size() const
     requires __cartesian_product_is_sized<const _First, const _Vs...>
   {
     return __size_impl();
@@ -130,7 +130,7 @@ public:
 
 private:
   template <bool _IsConst>
-  static constexpr __iterator<_IsConst> __end_impl(__maybe_const<_IsConst, cartesian_product_view>& __self) {
+  _LIBCPP_HIDE_FROM_ABI static constexpr __iterator<_IsConst> __end_impl(__maybe_const<_IsConst, cartesian_product_view>& __self) {
     const bool __empty = __self.__end_is_empty();
     const auto __ranges_to_iterators =
         [__empty, &__b = __self.__bases_]<std::size_t... _Ip>(std::index_sequence<_Ip...>) {
@@ -146,7 +146,7 @@ private:
   }
 
   template <std::size_t _Np = 1>
-  constexpr bool __end_is_empty() const {
+  _LIBCPP_HIDE_FROM_ABI constexpr bool __end_is_empty() const {
     if constexpr (_Np == 1 + sizeof...(_Vs))
       return false;
     else {
@@ -156,7 +156,7 @@ private:
     }
   }
 
-  constexpr auto __size_impl() const {
+  _LIBCPP_HIDE_FROM_ABI constexpr auto __size_impl() const {
     return std::apply(
         [](auto&&... __bases) {
           using _SizeType = std::common_type_t<std::ranges::range_size_t<decltype(__bases)>...>;
@@ -173,7 +173,7 @@ template <input_range _First, forward_range... _Vs>
   requires(view<_First> && ... && view<_Vs>)
 template <bool _IsConst>
 class cartesian_product_view<_First, _Vs...>::__iterator {
-  static constexpr auto __get_iterator_tag() {
+  _LIBCPP_HIDE_FROM_ABI static constexpr auto __get_iterator_tag() {
     if constexpr (__cartesian_product_is_random_access<_IsConst, _First, _Vs...>)
       return random_access_iterator_tag{};
     else if constexpr (__cartesian_product_is_bidirectional<_IsConst, _First, _Vs...>)
@@ -198,25 +198,25 @@ public:
       tuple<range_reference_t<__maybe_const<_IsConst, _First>>, range_reference_t<__maybe_const<_IsConst, _Vs>>...>;
   using difference_type = std::common_type_t<range_difference_t<_First>, range_difference_t<_Vs>...>;
 
-  __iterator() = default;
+  _LIBCPP_HIDE_FROM_ABI __iterator() = default;
 
-  constexpr __iterator(__iterator<!_IsConst> __i)
+  _LIBCPP_HIDE_FROM_ABI constexpr __iterator(__iterator<!_IsConst> __i)
     requires _IsConst && (convertible_to<iterator_t<_First>, iterator_t<const _First>> && ... &&
                           convertible_to<iterator_t<_Vs>, iterator_t<const _Vs>>)
       : __parent_(__i.__parent_), __current_(std::move(__i.__current_)) {}
 
-  [[nodiscard]] constexpr auto operator*() const {
+  [[nodiscard]] _LIBCPP_HIDE_FROM_ABI constexpr auto operator*() const {
     return __tuple_transform([](auto& __i) -> decltype(auto) { return *__i; }, __current_);
   }
 
-  constexpr __iterator& operator++() {
+  _LIBCPP_HIDE_FROM_ABI constexpr __iterator& operator++() {
     __next();
     return *this;
   }
 
-  constexpr void operator++(int) { ++*this; }
+  _LIBCPP_HIDE_FROM_ABI constexpr void operator++(int) { ++*this; }
 
-  [[nodiscard]] constexpr __iterator operator++(int)
+  [[nodiscard]] _LIBCPP_HIDE_FROM_ABI constexpr __iterator operator++(int)
     requires forward_range<__maybe_const<_IsConst, _First>>
   {
     auto __tmp = *this;
@@ -224,14 +224,14 @@ public:
     return __tmp;
   }
 
-  constexpr __iterator& operator--()
+  _LIBCPP_HIDE_FROM_ABI constexpr __iterator& operator--()
     requires __cartesian_product_is_bidirectional<_IsConst, _First, _Vs...>
   {
     __prev();
     return *this;
   }
 
-  [[nodiscard]] constexpr __iterator operator--(int)
+  [[nodiscard]] _LIBCPP_HIDE_FROM_ABI constexpr __iterator operator--(int)
     requires __cartesian_product_is_bidirectional<_IsConst, _First, _Vs...>
   {
     auto __tmp = *this;
@@ -239,65 +239,65 @@ public:
     return __tmp;
   }
 
-  constexpr __iterator& operator+=(difference_type __x)
+  _LIBCPP_HIDE_FROM_ABI constexpr __iterator& operator+=(difference_type __x)
     requires __cartesian_product_is_random_access<_IsConst, _First, _Vs...>
   {
     __advance(__x);
     return *this;
   }
 
-  constexpr __iterator& operator-=(difference_type __x)
+  _LIBCPP_HIDE_FROM_ABI constexpr __iterator& operator-=(difference_type __x)
     requires __cartesian_product_is_random_access<_IsConst, _First, _Vs...>
   {
     *this += -__x;
     return *this;
   }
 
-  [[nodiscard]] constexpr reference operator[](difference_type __n) const
+  [[nodiscard]] _LIBCPP_HIDE_FROM_ABI constexpr reference operator[](difference_type __n) const
     requires __cartesian_product_is_random_access<_IsConst, _First, _Vs...>
   {
     return *((*this) + __n);
   }
 
-  friend constexpr bool operator==(const __iterator& __x, const __iterator& __y)
+  friend _LIBCPP_HIDE_FROM_ABI constexpr bool operator==(const __iterator& __x, const __iterator& __y)
     requires equality_comparable<iterator_t<__maybe_const<_IsConst, _First>>>
   {
     return __x.__current_ == __y.__current_;
   }
 
-  friend constexpr bool operator==(const __iterator& __x, default_sentinel_t) { return __x.__at_end(); }
+  friend _LIBCPP_HIDE_FROM_ABI constexpr bool operator==(const __iterator& __x, default_sentinel_t) { return __x.__at_end(); }
 
-  friend constexpr auto operator<=>(const __iterator& __x, const __iterator& __y)
+  friend _LIBCPP_HIDE_FROM_ABI constexpr auto operator<=>(const __iterator& __x, const __iterator& __y)
     requires __cartesian_product_all_random_access<_IsConst, _First, _Vs...>
   {
     return __x.__current_ <=> __y.__current_;
   }
 
-  [[nodiscard]] friend constexpr __iterator operator+(const __iterator& __x, difference_type __y)
+  [[nodiscard]] friend _LIBCPP_HIDE_FROM_ABI constexpr __iterator operator+(const __iterator& __x, difference_type __y)
     requires __cartesian_product_is_random_access<_IsConst, _First, _Vs...>
   {
     return __iterator(__x) += __y;
   }
 
-  [[nodiscard]] friend constexpr __iterator operator+(difference_type __x, const __iterator& __y)
+  [[nodiscard]] friend _LIBCPP_HIDE_FROM_ABI constexpr __iterator operator+(difference_type __x, const __iterator& __y)
     requires __cartesian_product_is_random_access<_IsConst, _First, _Vs...>
   {
     return __y + __x;
   }
 
-  [[nodiscard]] friend constexpr __iterator operator-(const __iterator& __x, difference_type __y)
+  [[nodiscard]] friend _LIBCPP_HIDE_FROM_ABI constexpr __iterator operator-(const __iterator& __x, difference_type __y)
     requires __cartesian_product_is_random_access<_IsConst, _First, _Vs...>
   {
     return __iterator(__x) -= __y;
   }
 
-  [[nodiscard]] friend constexpr difference_type operator-(const __iterator& __x, const __iterator& __y)
+  [[nodiscard]] friend _LIBCPP_HIDE_FROM_ABI constexpr difference_type operator-(const __iterator& __x, const __iterator& __y)
     requires __cartesian_is_sized_sentinel<_IsConst, iterator_t, _First, _Vs...>
   {
     return __x.__distance_from(__y.__current_);
   }
 
-  [[nodiscard]] friend constexpr difference_type operator-(const __iterator& __i, default_sentinel_t)
+  [[nodiscard]] friend _LIBCPP_HIDE_FROM_ABI constexpr difference_type operator-(const __iterator& __i, default_sentinel_t)
     requires __cartesian_is_sized_sentinel<_IsConst, sentinel_t, _First, _Vs...>
   {
     tuple __end_tuple = [&__b = __i.__parent_->__bases_]<size_t... _Ip>(index_sequence<_Ip...>) {
@@ -306,17 +306,17 @@ public:
     return __i.__distance_from(__end_tuple);
   }
 
-  [[nodiscard]] friend constexpr difference_type operator-(default_sentinel_t, const __iterator& __i)
+  [[nodiscard]] friend _LIBCPP_HIDE_FROM_ABI constexpr difference_type operator-(default_sentinel_t, const __iterator& __i)
     requires __cartesian_is_sized_sentinel<_IsConst, sentinel_t, _First, _Vs...>
   {
     return -(__i - default_sentinel);
   }
 
-  [[nodiscard]] friend constexpr auto iter_move(const __iterator& __i) noexcept(__iter_move_noexcept_impl(__i)) {
+  [[nodiscard]] friend _LIBCPP_HIDE_FROM_ABI constexpr auto iter_move(const __iterator& __i) noexcept(__iter_move_noexcept_impl(__i)) {
     return __tuple_transform(ranges::iter_move, __i.__current_);
   }
 
-  friend constexpr void
+  friend _LIBCPP_HIDE_FROM_ABI constexpr void
   iter_swap(const __iterator& __l, const __iterator& __r) noexcept(__iter_swap_noexcept_impl(__l, __r))
     requires(indirectly_swappable<iterator_t<__maybe_const<_IsConst, _First>>> && ... &&
              indirectly_swappable<iterator_t<__maybe_const<_IsConst, _Vs>>>)
@@ -331,7 +331,7 @@ private:
   _MultiIter __current_;
 
   template <size_t _Np = sizeof...(_Vs)>
-  constexpr void __next() {
+  _LIBCPP_HIDE_FROM_ABI constexpr void __next() {
     auto& __it = std::get<_Np>(__current_);
     ++__it;
     if constexpr (_Np > 0) {
@@ -343,7 +343,7 @@ private:
   }
 
   template <size_t _Np = sizeof...(_Vs)>
-  constexpr void __prev() {
+  _LIBCPP_HIDE_FROM_ABI constexpr void __prev() {
     auto& __it = std::get<_Np>(__current_);
     if constexpr (_Np > 0) {
       if (const auto& __v = std::get<_Np>(__parent_->__bases_); __it == ranges::begin(__v)) {
@@ -355,7 +355,7 @@ private:
   }
 
   template <auto _Np = sizeof...(_Vs)>
-  constexpr void __advance(difference_type __x) {
+  _LIBCPP_HIDE_FROM_ABI constexpr void __advance(difference_type __x) {
     if (__x == 0)
       return;
 
@@ -391,7 +391,7 @@ private:
   }
 
   template <auto _Np = sizeof...(_Vs)>
-  constexpr bool __at_end() const {
+  _LIBCPP_HIDE_FROM_ABI constexpr bool __at_end() const {
     if (std::get<_Np>(__current_) == ranges::end(std::get<_Np>(__parent_->__bases_)))
       return true;
     if constexpr (_Np > 0)
@@ -400,34 +400,34 @@ private:
   }
 
   template <class _Tuple>
-  constexpr difference_type __distance_from(const _Tuple& __t) const {
+  _LIBCPP_HIDE_FROM_ABI constexpr difference_type __distance_from(const _Tuple& __t) const {
     return __scaled_sum(__t);
   }
 
   template <auto _Np>
-  constexpr difference_type __scaled_size() const {
+  _LIBCPP_HIDE_FROM_ABI constexpr difference_type __scaled_size() const {
     if constexpr (_Np <= sizeof...(_Vs))
       return static_cast<difference_type>(ranges::size(std::get<_Np>(__parent_->__bases_))) * __scaled_size<_Np + 1>();
     return static_cast<difference_type>(1);
   }
 
   template <auto _Np>
-  constexpr difference_type __scaled_distance(const auto& __t) const {
+  _LIBCPP_HIDE_FROM_ABI constexpr difference_type __scaled_distance(const auto& __t) const {
     return static_cast<difference_type>(std::get<_Np>(__current_) - std::get<_Np>(__t)) * __scaled_size<_Np + 1>();
   }
 
   template <auto _Np = 0>
-  constexpr difference_type __scaled_sum(const auto& __t) const {
+  _LIBCPP_HIDE_FROM_ABI constexpr difference_type __scaled_sum(const auto& __t) const {
     if constexpr (_Np <= sizeof...(_Vs))
       return __scaled_distance<_Np>(__t) + __scaled_sum<_Np + 1>(__t);
     return static_cast<difference_type>(0);
   }
 
-  constexpr __iterator(_Parent& __parent, _MultiIter __current)
+  _LIBCPP_HIDE_FROM_ABI constexpr __iterator(_Parent& __parent, _MultiIter __current)
       : __parent_(std::addressof(__parent)), __current_(std::move(__current)) {}
 
   template <auto _Np = sizeof...(_Vs)>
-  static constexpr bool __iter_move_noexcept_impl(const __iterator& __i) {
+  _LIBCPP_HIDE_FROM_ABI static constexpr bool __iter_move_noexcept_impl(const __iterator& __i) {
     if (not noexcept(std::ranges::iter_move(std::get<_Np>(__i.__current_))))
       return false;
     if constexpr (_Np > 0)
@@ -441,7 +441,7 @@ private:
   }
 
   template <auto _Ip = sizeof...(_Vs)>
-  static constexpr bool __iter_swap_noexcept_impl(const __iterator& __l, const __iterator& __r) {
+  _LIBCPP_HIDE_FROM_ABI static constexpr bool __iter_swap_noexcept_impl(const __iterator& __l, const __iterator& __r) {
     if (not noexcept(std::ranges::iter_swap(std::get<_Ip>(__l.__current_), std::get<_Ip>(__r.__current_))))
       return false;
     if constexpr (_Ip > 0)
@@ -450,7 +450,7 @@ private:
   }
 
   template <auto _Np = sizeof...(_Vs)>
-  static constexpr void __iter_swap_impl(const __iterator& __l, const __iterator& __r) {
+  _LIBCPP_HIDE_FROM_ABI static constexpr void __iter_swap_impl(const __iterator& __l, const __iterator& __r) {
     ranges::iter_swap(std::get<_Np>(__l.__current_), std::get<_Np>(__r.__current_));
     if constexpr (_Np > 0)
       __iter_swap_impl<_Np - 1>(__l, __r);
