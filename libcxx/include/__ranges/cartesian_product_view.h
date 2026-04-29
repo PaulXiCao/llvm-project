@@ -130,7 +130,8 @@ public:
 
 private:
   template <bool _IsConst>
-  _LIBCPP_HIDE_FROM_ABI static constexpr __iterator<_IsConst> __end_impl(__maybe_const<_IsConst, cartesian_product_view>& __self) {
+  _LIBCPP_HIDE_FROM_ABI static constexpr __iterator<_IsConst>
+  __end_impl(__maybe_const<_IsConst, cartesian_product_view>& __self) {
     const bool __empty = __self.__end_is_empty();
     const auto __ranges_to_iterators =
         [__empty, &__b = __self.__bases_]<std::size_t... _Ip>(std::index_sequence<_Ip...>) {
@@ -265,7 +266,9 @@ public:
     return __x.__current_ == __y.__current_;
   }
 
-  friend _LIBCPP_HIDE_FROM_ABI constexpr bool operator==(const __iterator& __x, default_sentinel_t) { return __x.__at_end(); }
+  friend _LIBCPP_HIDE_FROM_ABI constexpr bool operator==(const __iterator& __x, default_sentinel_t) {
+    return __x.__at_end();
+  }
 
   friend _LIBCPP_HIDE_FROM_ABI constexpr auto operator<=>(const __iterator& __x, const __iterator& __y)
     requires __cartesian_product_all_random_access<_IsConst, _First, _Vs...>
@@ -291,13 +294,15 @@ public:
     return __iterator(__x) -= __y;
   }
 
-  [[nodiscard]] friend _LIBCPP_HIDE_FROM_ABI constexpr difference_type operator-(const __iterator& __x, const __iterator& __y)
+  [[nodiscard]] friend _LIBCPP_HIDE_FROM_ABI constexpr difference_type
+  operator-(const __iterator& __x, const __iterator& __y)
     requires __cartesian_is_sized_sentinel<_IsConst, iterator_t, _First, _Vs...>
   {
     return __x.__distance_from(__y.__current_);
   }
 
-  [[nodiscard]] friend _LIBCPP_HIDE_FROM_ABI constexpr difference_type operator-(const __iterator& __i, default_sentinel_t)
+  [[nodiscard]] friend _LIBCPP_HIDE_FROM_ABI constexpr difference_type
+  operator-(const __iterator& __i, default_sentinel_t)
     requires __cartesian_is_sized_sentinel<_IsConst, sentinel_t, _First, _Vs...>
   {
     tuple __end_tuple = [&__b = __i.__parent_->__bases_]<size_t... _Ip>(index_sequence<_Ip...>) {
@@ -306,13 +311,15 @@ public:
     return __i.__distance_from(__end_tuple);
   }
 
-  [[nodiscard]] friend _LIBCPP_HIDE_FROM_ABI constexpr difference_type operator-(default_sentinel_t, const __iterator& __i)
+  [[nodiscard]] friend _LIBCPP_HIDE_FROM_ABI constexpr difference_type
+  operator-(default_sentinel_t, const __iterator& __i)
     requires __cartesian_is_sized_sentinel<_IsConst, sentinel_t, _First, _Vs...>
   {
     return -(__i - default_sentinel);
   }
 
-  [[nodiscard]] friend _LIBCPP_HIDE_FROM_ABI constexpr auto iter_move(const __iterator& __i) noexcept(__iter_move_noexcept_impl(__i)) {
+  [[nodiscard]] friend _LIBCPP_HIDE_FROM_ABI constexpr auto
+  iter_move(const __iterator& __i) noexcept(__iter_move_noexcept_impl(__i)) {
     return __tuple_transform(ranges::iter_move, __i.__current_);
   }
 
