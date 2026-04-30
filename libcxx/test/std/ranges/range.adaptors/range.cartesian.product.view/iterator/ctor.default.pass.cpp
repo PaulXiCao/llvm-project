@@ -61,7 +61,7 @@ constexpr bool test() {
     (void)*it; // default-constructible and dereferenceable
   }
   {
-    Iter it = {};
+    Iter it     = {};
     auto [x, y] = *it;
     assert(x == 0);
     assert(y == 0);

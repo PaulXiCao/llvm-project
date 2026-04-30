@@ -57,7 +57,7 @@ constexpr bool test() {
     ++it; // (a[0], b[1])
     assert(std::default_sentinel - it == 5);
     assert(it - std::default_sentinel == -5);
-    
+
     ++it; // wrap inner, advance outer -> (a[1], b[0])
     assert(std::default_sentinel - it == 4);
     assert(it - std::default_sentinel == -4);

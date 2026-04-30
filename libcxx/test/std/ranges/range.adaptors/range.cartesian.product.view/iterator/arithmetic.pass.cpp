@@ -37,7 +37,7 @@ constexpr bool test() {
     std::ranges::cartesian_product_view v(a, b);
     auto it1 = v.begin();
 
-    const auto it2 = it1 + 5; // (a[1], b[1])
+    const auto it2      = it1 + 5; // (a[1], b[1])
     const auto [x2, y2] = *it2;
     assert(&x2 == &a[1]);
     assert(&y2 == &b[1]);
@@ -55,7 +55,7 @@ constexpr bool test() {
     std::ranges::cartesian_product_view v(a, b);
     auto it1 = v.end();
 
-    auto it2 = it1 - 5; // total size 12, so `end - 5 = (a[2], b[3]) - 4 = (a[1], b[3])`
+    auto it2      = it1 - 5; // total size 12, so `end - 5 = (a[2], b[3]) - 4 = (a[1], b[3])`
     auto [x2, y2] = *it2;
     assert(&x2 == &a[1]);
     assert(&y2 == &b[3]);

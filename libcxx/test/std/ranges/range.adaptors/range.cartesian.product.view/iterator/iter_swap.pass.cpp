@@ -27,7 +27,7 @@ struct ThrowingMove {
 
 // A view whose iterator is not indirectly_swappable (no rvalue assignment).
 struct ImmovableElement {
-  int v = 0;
+  int v                        = 0;
   constexpr ImmovableElement() = default;
   constexpr ImmovableElement(int x) : v(x) {}
   ImmovableElement(const ImmovableElement&)            = delete;
