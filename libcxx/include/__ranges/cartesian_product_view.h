@@ -316,7 +316,7 @@ public:
   operator-(const __iterator& __i, default_sentinel_t)
     requires __cartesian_is_sized_sentinel<_IsConst, sentinel_t, _First, _Vs...>
   {
-    tuple __end_tuple = [&__b = __i.__parent_->__bases_]<size_t... _Ip>(index_sequence<_Ip...>) {
+    tuple __end_tuple = [&__b = __i.__parent_->__bases_]<std::size_t... _Ip>(std::index_sequence<_Ip...>) {
       return tuple{ranges::end(std::get<0>(__b)), ranges::begin(std::get<1 + _Ip>(__b))...};
     }(std::make_index_sequence<sizeof...(_Vs)>{});
     return __i.__distance_from(__end_tuple);
@@ -348,7 +348,7 @@ private:
   using _MultiIter   = tuple<iterator_t<__maybe_const<_IsConst, _First>>, iterator_t<__maybe_const<_IsConst, _Vs>>...>;
   _MultiIter __current_;
 
-  template <size_t _Np = sizeof...(_Vs)>
+  template <std::size_t _Np = sizeof...(_Vs)>
   _LIBCPP_HIDE_FROM_ABI constexpr void __next() {
     auto& __it = std::get<_Np>(__current_);
     ++__it;
@@ -360,7 +360,7 @@ private:
     }
   }
 
-  template <size_t _Np = sizeof...(_Vs)>
+  template <std::size_t _Np = sizeof...(_Vs)>
   _LIBCPP_HIDE_FROM_ABI constexpr void __prev() {
     auto& __it = std::get<_Np>(__current_);
     if constexpr (_Np > 0) {
