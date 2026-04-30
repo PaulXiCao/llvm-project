@@ -14,12 +14,23 @@
 #include <__iterator/default_sentinel.h>
 #include <__iterator/distance.h>
 #include <__iterator/iter_move.h>
+#include <__iterator/iter_swap.h>
 #include <__iterator/next.h>
 #include <__memory/addressof.h>
+#include <__ranges/access.h>
+#include <__ranges/all.h>
 #include <__ranges/concepts.h>
+#include <__ranges/empty.h>
 #include <__ranges/single_view.h>
+#include <__ranges/size.h>
+#include <__ranges/view_interface.h>
 #include <__ranges/zip_view.h>
+#include <__tuple/tuple_transform.h>
 #include <__type_traits/maybe_const.h>
+#include <__utility/forward.h>
+#include <__utility/integer_sequence.h>
+#include <__utility/move.h>
+#include <cstddef>
 #include <tuple>
 #include <type_traits>
 
