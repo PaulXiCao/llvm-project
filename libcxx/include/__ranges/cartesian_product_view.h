@@ -10,9 +10,13 @@
 #define _LIBCPP___RANGES_CARTESIAN_PRODUCT_VIEW_H
 
 #include <__config>
+#include <__concepts/convertible_to.h>
+#include <__concepts/equality_comparable.h>
 #include <__iterator/access.h>
+#include <__iterator/concepts.h>
 #include <__iterator/default_sentinel.h>
 #include <__iterator/distance.h>
+#include <__iterator/iterator_traits.h>
 #include <__iterator/iter_move.h>
 #include <__iterator/iter_swap.h>
 #include <__iterator/next.h>
